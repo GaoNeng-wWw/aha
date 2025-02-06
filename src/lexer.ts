@@ -55,9 +55,9 @@ export const enum TokenKind {
 }
 
 
-export class Token<T> {
+export class Token {
   constructor(
-    public kind: T,
+    public kind: TokenKind,
     public value: string,
   ){}
 }
@@ -70,7 +70,7 @@ export class LexerError extends Error {
 }
 export class Lexer {
   private pos: number;
-  private tokens: Token<TokenKind>[]
+  private tokens: Token[]
   constructor(
     public rules: LexerRule[],
     public input: string
@@ -97,7 +97,7 @@ export class Lexer {
     this.tokens.push(this.createToken(TokenKind.EOF,'EOF'));
     return this.tokens;
   }
-  push(token: Token<TokenKind>){
+  push(token: Token){
     this.tokens.push(token);
     return;
   }
