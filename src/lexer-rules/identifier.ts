@@ -3,7 +3,7 @@ import { LexerRule, Token, TokenKind } from "../lexer";
 const builtinKeywordLookup: { [key: string]: TokenKind } = {
   'true': TokenKind.BOOLEAN,
   'false':TokenKind.BOOLEAN,
-  'const': TokenKind.CONST,
+  'const': TokenKind.LET,
   'fn': TokenKind.FUNCTION,
   'if': TokenKind.IF,
   'else': TokenKind.ELSE,

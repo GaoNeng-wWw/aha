@@ -1,4 +1,4 @@
-export const enum TokenKind {
+export enum TokenKind {
   EOF,
   STRING,
   NUMBER,
@@ -40,12 +40,12 @@ export const enum TokenKind {
   // MATH
   PLUS,          // +
   DASH,          // -
-  SLAST,         // /
+  SLASH,         // /
   STAR,          // *
   PERCENT,       // %
 
   // KEYWORD
-  CONST,
+  LET,
   FUNCTION,
   IF,
   ELSE,
@@ -60,6 +60,12 @@ export class Token {
     public kind: TokenKind,
     public value: string,
   ){}
+  isOne(kind: TokenKind){
+    return this.kind === kind;
+  }
+  isMany(...kinds:TokenKind[]){
+    return kinds.some((k) => k === this.kind);
+  }
 }
 export type LexerRuleHandle = (param:{lexer:Lexer,pattern:RegExp,match:RegExpMatchArray, reminder: string}) => void;
 export type LexerRule = [RegExp, LexerRuleHandle];
@@ -68,14 +74,17 @@ export class LexerError extends Error {
     super(`ERR Lexer: ${message}`);
   }
 }
+export const getTokenName = (tokenKind: TokenKind) => TokenKind[tokenKind].toLowerCase();
 export class Lexer {
-  private pos: number;
-  private tokens: Token[]
+  public pos: number;
+  public tokens: Token[]
+  public cursor: number;
   constructor(
     public rules: LexerRule[],
     public input: string
   ){
     this.pos = 0;
+    this.cursor = 0;
     this.tokens = [];
   }
   run(){
