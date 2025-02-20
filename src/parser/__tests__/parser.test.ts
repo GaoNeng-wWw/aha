@@ -231,4 +231,18 @@ describe('Parser', ()=>{
     const parser = createParser(tokens)
     parser.run();
   })
+  it('parse for statement (VarDeclStmt)', ()=>{
+    const lexer = createLexer(rules, 'for (let x<-0;x<100;x <- x+1){x;}');
+    const tokens = lexer.run()
+    tokenTobeDefined(tokens);
+    const parser = createParser(tokens);
+    parser.run()
+  })
+  it.only('parse for statement (Assignment)', ()=>{
+    const lexer = createLexer(rules, 'let x; for (x<-0;x<100;x <- x+1){x;}');
+    const tokens = lexer.run()
+    tokenTobeDefined(tokens);
+    const parser = createParser(tokens);
+    parser.run()
+  })
 })

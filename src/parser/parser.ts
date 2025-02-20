@@ -16,6 +16,7 @@ import { getTokenName,Token, TokenKind } from "../lexer";
 import { BP } from "./bp-lookup";
 import { ComputedExpr } from "@/ast/computed-expr";
 import { ReturnStatement } from "@/ast/return-statement";
+import { ForStatement } from "@/ast/for-stmt";
 
 export type NudParser = () => AstExpr;
 export type LedParser = (left: AstExpr, bp: BP) => AstExpr;
@@ -248,6 +249,22 @@ export class Parser {
     const returnValue = this.parseExprStmt();
     return new ReturnStatement(returnValue);
   }
+  parseForStatement(){
+    this.next();
+    this.expect(TokenKind.OPEN_PAREN);
+
+    const initialization = this.peek().kind === TokenKind.LET ? this.parseVarDeclStmt() : this.parseExpr(BP.DEFAULT_BP);
+    while (this.peek().kind === TokenKind.SEMI) {
+      this.expect(TokenKind.SEMI);
+    }
+    const condition = this.parseExpr(BP.LOGICAL);
+    while (this.peek().kind === TokenKind.SEMI) {
+      this.expect(TokenKind.SEMI);
+    }
+    const incrementor = this.parseExpr(BP.DEFAULT_BP);
+    this.expect(TokenKind.CLOSE_PAREN);
+    return new ForStatement(initialization, condition, incrementor, this.parseBlock().body);
+  }
 
   public peek(){
     return this.tokens[this.cursor];
@@ -333,5 +350,6 @@ export class Parser {
     this.stmt(TokenKind.FUNCTION, this.parseFnDecl);
     this.stmt(TokenKind.IF, this.parseIfStmt);
     this.stmt(TokenKind.RETURN, this.parseReturn);
+    this.stmt(TokenKind.FOR, this.parseForStatement);
   }
 }
