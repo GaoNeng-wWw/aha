@@ -8,7 +8,7 @@ import { FunctionDeclStmt } from "../ast/function-declaration-stmt";
 import { FunctionExpr } from "../ast/function-expr";
 import { IfStmt } from "../ast/if-stmt";
 import { AstExpr, AstStmt } from "../ast/node";
-import {  AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/number-expr";
+import {  ArrayLiteral, AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/number-expr";
 import { ParameterStmt } from "../ast/parameter";
 import { PrefixExpr } from "../ast/prefix-expr";
 import { VarDeclStmt } from "../ast/variable-declaration-stmt";
@@ -17,6 +17,7 @@ import { BP } from "./bp-lookup";
 import { ComputedExpr } from "@/ast/computed-expr";
 import { ReturnStatement } from "@/ast/return-statement";
 import { ForStatement } from "@/ast/for-stmt";
+import { ObjectLiteral, Property } from "@/ast/object-literal";
 
 export type NudParser = () => AstExpr;
 export type LedParser = (left: AstExpr, bp: BP) => AstExpr;
@@ -265,6 +266,41 @@ export class Parser {
     this.expect(TokenKind.CLOSE_PAREN);
     return new ForStatement(initialization, condition, incrementor, this.parseBlock().body);
   }
+  parseArrayLiteral(){
+    this.expect(TokenKind.OPEN_BRACKET);
+    const contents:AstExpr[] = [];
+    while (
+      this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_BRACKET
+    ) {
+      contents.push(this.parseExpr(BP.DEFAULT_BP))
+      if (!this.peek().isMany(TokenKind.EOF, TokenKind.CLOSE_BRACKET)) {
+        this.expect(TokenKind.COMMA);
+      }
+    }
+    this.expect(TokenKind.CLOSE_BRACKET);
+    return new ArrayLiteral(contents);
+  }
+  parseObjectLiteral(){
+    this.expect(TokenKind.OPEN_CURLY);
+    const properties:Property[] = [];
+    while (
+      this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_CURLY
+    ) {
+      const property = this.parseObjectProperty();
+      properties.push(property);
+      if (!this.peek().isMany(TokenKind.EOF, TokenKind.CLOSE_CURLY)){
+        this.expect(TokenKind.COMMA);
+      }
+    }
+    this.expect(TokenKind.CLOSE_CURLY);
+    return new ObjectLiteral(properties)
+  }
+  parseObjectProperty(){
+    const id = this.expect(TokenKind.IDENTIFIER).value;
+    this.expect(TokenKind.COLON)
+    const value = this.parseExpr(BP.DEFAULT_BP);
+    return new Property(id, value);
+  }
 
   public peek(){
     return this.tokens[this.cursor];
@@ -334,7 +370,9 @@ export class Parser {
     this.nud(TokenKind.STRING, BP.PRIMAR, this.parsePrimaryExpr);
     this.nud(TokenKind.BOOLEAN, BP.PRIMAR, this.parsePrimaryExpr);
     this.nud(TokenKind.IDENTIFIER, BP.PRIMAR, this.parsePrimaryExpr);
-
+    this.nud(TokenKind.OPEN_BRACKET, BP.PRIMAR, this.parseArrayLiteral);
+    this.nud(TokenKind.OPEN_CURLY, BP.PRIMAR, this.parseObjectLiteral);
+    
     this.nud(TokenKind.DASH, BP.UNARY, this.parsePrefixExpr);
     this.nud(TokenKind.NOT, BP.UNARY, this.parsePrefixExpr);
 
