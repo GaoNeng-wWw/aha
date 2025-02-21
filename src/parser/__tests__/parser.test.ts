@@ -252,4 +252,22 @@ describe('Parser', ()=>{
     const parser = createParser(tokens);
     parser.run()
   })
+  it('parse object', ()=>{
+    const lexer = createLexer(
+      rules,
+    `
+    let obj <- {
+      a: 1,
+      b: fn(){
+      },
+      c: [1,2,3, {a: 2}],
+    };
+    obj.a;
+    `);
+    const tokens = lexer.run()
+    tokenTobeDefined(tokens);
+    const parser = createParser(tokens);
+    parser.run()
+    console.log(parser.dump())
+  })
 })
