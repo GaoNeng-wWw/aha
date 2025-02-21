@@ -8,7 +8,7 @@ import { FunctionDeclStmt } from "../ast/function-declaration-stmt";
 import { FunctionExpr } from "../ast/function-expr";
 import { IfStmt } from "../ast/if-stmt";
 import { AstExpr, AstStmt } from "../ast/node";
-import {  ArrayLiteral, AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/number-expr";
+import {  ArrayLiteral, AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/literal-expression";
 import { ParameterStmt } from "../ast/parameter";
 import { PrefixExpr } from "../ast/prefix-expr";
 import { VarDeclStmt } from "../ast/variable-declaration-stmt";

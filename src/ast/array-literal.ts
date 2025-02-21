@@ -1,3 +1,4 @@
+import { Env } from "./env";
 import { AstExpr, AstStmt } from "./node";
 
 export class ArrayLiteral extends AstStmt {
@@ -6,5 +7,8 @@ export class ArrayLiteral extends AstStmt {
     public contents: AstExpr[]
   ){
     super();
+  }
+  eval(env: Env): AstExpr[] {
+    return this.contents
   }
 }

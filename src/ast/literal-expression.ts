@@ -1,4 +1,7 @@
+import { is, isMany } from "@/utils";
+import { Env } from "./env";
 import { AstExpr } from "./node";
+import { ObjectLiteral } from "./object-literal";
 
 export class AstNumberLiteral extends AstExpr {
   public name = 'Number Literal';
@@ -17,8 +20,8 @@ export class AstBooleanLiteral extends AstExpr {
   ){
     super();
   }
-  eval(): string {
-    return this.val;
+  eval() {
+    return JSON.parse(this.val);
   }
 }
 
@@ -40,8 +43,12 @@ export class AstSymbolExpr extends AstExpr {
   ){
     super();
   }
-  eval(){
-    return this.val;
+  eval(env: Env){
+    const maybeExp = env.lookup(this.val);
+    if (isMany(maybeExp, [AstNumberLiteral,AstBooleanLiteral,AstStringLiteral,ArrayLiteral,ObjectLiteral])){
+      return maybeExp.eval(env);
+    }
+    return maybeExp;
   }
 }
 

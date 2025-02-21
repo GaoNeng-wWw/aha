@@ -1,3 +1,4 @@
+import { Env } from "./env";
 import { AstExpr, AstStmt } from "./node";
 
 export class VarDeclStmt extends AstStmt {
@@ -9,4 +10,8 @@ export class VarDeclStmt extends AstStmt {
   ){
     super();
   };
+  eval(env: Env): AstExpr {
+    env.insert(this.id, this.value.eval(env));
+    return this.value;
+  }
 }
