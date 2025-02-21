@@ -27,7 +27,7 @@ export const numberLiteralRule:LexerRule = [
   }
 ]
 export const booleanLiteralRule:LexerRule = [
-  /^true|false/,
+  /^true|^false/,
   ({lexer,match}) => {
     const val = match[0];
     lexer.push(lexer.createToken(TokenKind.BOOLEAN, val));

@@ -238,8 +238,15 @@ describe('Parser', ()=>{
     const parser = createParser(tokens);
     parser.run()
   })
-  it.only('parse for statement (Assignment)', ()=>{
+  it('parse for statement (Assignment)', ()=>{
     const lexer = createLexer(rules, 'let x; for (x<-0;x<100;x <- x+1){x;}');
+    const tokens = lexer.run()
+    tokenTobeDefined(tokens);
+    const parser = createParser(tokens);
+    parser.run()
+  })
+  it('parse array', ()=>{
+    const lexer = createLexer(rules, '[1,2,3,"hello world", true,false, [1,2,3]];');
     const tokens = lexer.run()
     tokenTobeDefined(tokens);
     const parser = createParser(tokens);
