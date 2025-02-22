@@ -3,7 +3,7 @@ import { AstNode } from "./node";
 export class Env {
   private env: Map<string, unknown>;
   constructor(
-    private parnet: Env | null
+    private parent: Env | null=null
   ){
     this.env = new Map();
   }
@@ -11,11 +11,11 @@ export class Env {
     name: string,
     depth: number = -1,
   ): unknown | null{
-    const val = this.env.get(name);
-    if (val || depth){
+    const val = this.env.get(name) ?? null;
+    if (val !== null){
       return val ?? null;
     }
-    return this.parnet?.lookup(name, depth - 1) ?? null;
+    return this.parent?.lookup(name, depth - 1) ?? null;
   }
   insert(
     name: string,
@@ -24,9 +24,9 @@ export class Env {
     return this.env.set(name,node);
   }
   has(name: string, depth: number = 0):boolean {
-    if (!this.parnet || depth === 0){
+    if (!this.parent || depth === 0){
       return this.env.has(name);
     }
-    return this.env.has(name) ? true : this.parnet?.has(name, depth - 1);
+    return this.env.has(name) ? true : this.parent?.has(name, depth - 1);
   }
 }
