@@ -25,7 +25,7 @@ describe('Env', () => {
     const node = new MockNode();
     parentEnv.insert('test', node);
     const result = childEnv.lookup('test');
-    expect(result).toBe(null);
+    expect(result).toBe(node);
   });
 
   it('should respect depth limit when looking up', () => {

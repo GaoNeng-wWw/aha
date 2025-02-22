@@ -29,4 +29,11 @@ export class Env {
     }
     return this.env.has(name) ? true : this.parent?.has(name, depth - 1);
   }
+  remove(name:string){
+    if (this.has(name)){
+      this.env.delete(name);
+      return;
+    }
+    this.parent?.remove(name);
+  }
 }
