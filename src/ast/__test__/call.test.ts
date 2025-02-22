@@ -9,8 +9,76 @@ import { ReturnStatement } from "../return-statement";
 import { AstStmt } from "../node";
 import { CallExpr } from "../call-expr";
 import { Env } from "../env";
+import { FunctionExpr } from "../function-expr";
+import { VarDeclStmt } from "../variable-declaration-stmt";
 
 describe('Call', ()=>{
+  const _fib = (n: number):number => {
+    if (n === 0) { return 0;}
+    if (n === 1) { return 1;}
+    return _fib(n-1) + _fib(n-2);
+  }
+  it('Function Expression', ()=>{
+    const env = new Env();
+    const f = new FunctionExpr(
+      [],
+      []
+    )
+    const f2 = new VarDeclStmt('f', false, f);
+    f2.eval(env);
+    expect(env.lookup('f')).toBe(f);
+    const call = createCall('f', []);
+    expect(call.eval(env)).instanceOf(NullLiteral)
+  })
+  it('Function Expression recursion', ()=>{
+    const fib = new FunctionExpr(
+      [
+        new ParameterStmt('x')
+      ],
+      [
+        new IfStmt(
+          new BinaryExpr(
+            new AstSymbolExpr('x'),
+            createToken(TokenKind.EQUALS),
+            createNumberLiteral(0)
+          ),
+          new ReturnStatement(
+            createNumberLiteral(0)
+          ),
+          new AstStmt()
+        ),
+        new IfStmt(
+          new BinaryExpr(
+            new AstSymbolExpr('x'),
+            createToken(TokenKind.LT),
+            createNumberLiteral(1)
+          ),
+          new ReturnStatement(
+            createNumberLiteral(1)
+          ),
+          new AstStmt()
+        ),
+        new ReturnStatement(
+          new BinaryExpr(
+            new CallExpr(
+              new AstSymbolExpr('fib'),
+              [new BinaryExpr(new AstSymbolExpr('x'), createToken(TokenKind.DASH), createNumberLiteral(1))]
+            ),
+            createToken(TokenKind.PLUS),
+            new CallExpr(
+              new AstSymbolExpr('fib'),
+              [new BinaryExpr(new AstSymbolExpr('x'), createToken(TokenKind.DASH), createNumberLiteral(2))]
+            ),
+          )
+        )
+      ]
+    );
+    const env = new Env();
+    const f = new VarDeclStmt('fib', false, fib);
+    f.eval(env);
+    expect(env.lookup('fib')).toBe(fib);
+    expect(new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(15)]).eval(env)).toBe(_fib(15));
+  })
   it('Except Identifier but found number', ()=>{
     const env = new Env();
     const f = createFn(
@@ -106,11 +174,6 @@ describe('Call', ()=>{
       ]
     );
     fib.eval(env);
-    const f = (n: number):number => {
-      if (n === 0) { return 0;}
-      if (n === 1) { return 1;}
-      return f(n-1) + f(n-2);
-    }
-    expect(new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(15)]).eval(env)).toBe(f(15));
+    expect(new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(15)]).eval(env)).toBe(_fib(15));
   })
 })

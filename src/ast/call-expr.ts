@@ -3,6 +3,7 @@ import { Env } from "./env";
 import { AstExpr} from "./node";
 import { AstSymbolExpr, NullLiteral } from "./literal-expression";
 import { FunctionDeclStmt } from "./function-declaration-stmt";
+import { FunctionExpr } from "./function-expr";
 
 export class CallExpr extends AstExpr {
   public name = 'Call Expression'
@@ -18,7 +19,7 @@ export class CallExpr extends AstExpr {
     }
     const fnName = this.method.val;
     const fn = env.lookup(fnName,-1);
-    if (!is(fn, FunctionDeclStmt)){
+    if (!is(fn, FunctionDeclStmt) && !is(fn, FunctionExpr)){
       throw new Error(`${fnName} is not function`);
     }
     const fnEnv = new Env(env);
