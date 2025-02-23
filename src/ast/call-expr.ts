@@ -37,14 +37,15 @@ export class CallExpr extends AstExpr {
     }
     const body = fn.body;
 
-    let ret: unknown = new NullLiteral();
     for (const stmt of body) {
-      ret = stmt.eval(fnEnv);
-      if (fnEnv.has(RETURN)){
+      stmt.eval(fnEnv);
+      if (fnEnv.has(RETURN) || fnEnv.globalEnv.has(RETURN)){
+        const val = fnEnv.globalEnv.lookup(RETURN);
         fnEnv.remove(RETURN);
-        return ret;
+        fnEnv.globalEnv.remove(RETURN);
+        return val;
       }
     }
-    return ret;
+    return new NullLiteral();;
   }
 }

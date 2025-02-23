@@ -1,9 +1,7 @@
-import { AstNode } from "./node";
-
 export class Env {
   private env: Map<string, unknown>;
   constructor(
-    private parent: Env | null=null
+    public parent: Env | null=null
   ){
     this.env = new Map();
   }
@@ -36,4 +34,13 @@ export class Env {
     }
     this.parent?.remove(name);
   }
+  
+  public get globalEnv() : Env {
+    let env:Env = this;
+    while (env.parent){
+      env = env.parent;
+    }
+    return env;
+  }
+  
 }

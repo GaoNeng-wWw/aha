@@ -6,6 +6,7 @@ import { VarDeclStmt } from "./variable-declaration-stmt";
 import { BreakStmt } from "./break-stmt";
 import { BREAK, CONTINUE } from "@/constant";
 import { ContinueStmt } from "./continue-stmt";
+import { ReturnStatement } from "./return-statement";
 
 export class ForStatement extends AstStmt {
   public name = 'ForStatement'
@@ -26,9 +27,9 @@ export class ForStatement extends AstStmt {
       maybeValidInitializer = this.initializer.val;
     } else {
       throw new Error(`Invalid initializer: ${this.initializer.eval(env)}`);
-
     }
-    while (this.condition.eval(env)) {
+    const forEnv = new Env(env);
+    while (this.condition.eval(forEnv)) {
       for (const body of this.body){
         if (body instanceof BreakStmt){
           return;
@@ -36,17 +37,20 @@ export class ForStatement extends AstStmt {
         if (body instanceof ContinueStmt){
           break;
         }
-        body.eval(env);
-        if (env.has(BREAK)){
-          env.remove(BREAK);
+        if (body instanceof ReturnStatement){
+          return body.eval(forEnv);
+        }
+        body.eval(forEnv);
+        if (forEnv.has(BREAK)){
+          forEnv.remove(BREAK);
           return;
         }
-        if (env.has(CONTINUE)){
-          env.remove(CONTINUE);
+        if (forEnv.has(CONTINUE)){
+          forEnv.remove(CONTINUE);
           break;
         }
       }
-      this.incrementor.eval(env);
+      this.incrementor.eval(forEnv);
     }
     return;
   }

@@ -13,9 +13,10 @@ export class IfStmt extends AstStmt {
     super();
   }
   eval(env: Env): unknown {
-    if (this.condition.eval(env)){
-      return this.body.eval(env);
+    const ifEnv = new Env(env);
+    if (this.condition.eval(ifEnv)){
+      return this.body.eval(ifEnv);
     }
-    return this.elseBody.eval(env);
+    return this.elseBody.eval(ifEnv);
   }
 }

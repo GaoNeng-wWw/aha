@@ -10,7 +10,9 @@ export class ReturnStatement extends AstStmt{
     super();
   }
   eval(env: Env): unknown {
-    env.insert(RETURN, true);
-    return this.value.eval(env);
+    const val = this.value.eval(env);
+    env.insert(RETURN, val);
+    env.globalEnv.insert(RETURN, val);
+    return val
   }
 }
