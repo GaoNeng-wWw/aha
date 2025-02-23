@@ -31,12 +31,6 @@ export class ForStatement extends AstStmt {
     const forEnv = new Env(env);
     while (this.condition.eval(forEnv)) {
       for (const body of this.body){
-        if (body instanceof BreakStmt){
-          return;
-        }
-        if (body instanceof ContinueStmt){
-          break;
-        }
         if (body instanceof ReturnStatement){
           return body.eval(forEnv);
         }
