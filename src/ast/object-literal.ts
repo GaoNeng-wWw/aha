@@ -1,3 +1,4 @@
+import { Env } from "./env";
 import { AstExpr } from "./node";
 
 export class ObjectLiteral extends AstExpr {
@@ -6,6 +7,9 @@ export class ObjectLiteral extends AstExpr {
     public properties: Property[]
   ){
     super();
+  }
+  eval(env: Env): unknown {
+    return this;
   }
 }
 
@@ -16,5 +20,8 @@ export class Property extends AstExpr {
     public vaule: AstExpr
   ){
     super();
+  }
+  eval(env: Env): unknown {
+    return this;
   }
 }
