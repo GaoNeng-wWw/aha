@@ -1,4 +1,4 @@
-import { describe,expect,it } from "vitest";
+import { describe,expect,it, vi } from "vitest";
 import { Env } from "../env";
 import { createNumberLiteral, createToken } from "./utils";
 import { AstNumberLiteral, AstSymbolExpr } from "../literal-expression";
@@ -8,6 +8,8 @@ import { TokenKind } from "@/lexer";
 import { ForStatement } from "../for-stmt";
 import { AstStmt } from "../node";
 import { VarDeclStmt } from "../variable-declaration-stmt";
+import { BreakStmt } from "../break-stmt";
+import { ContinueStmt } from "../continue-stmt";
 
 describe('For statement', ()=>{
   class MockStmt extends AstStmt {
@@ -129,4 +131,64 @@ describe('For statement', ()=>{
     forStatement.eval(env);
     expect(mockStmt.count).toBe(10);
   });
+  it('Break', ()=>{
+    const env = new Env(null);
+    env.insert('x', createNumberLiteral(0));
+    const initializer = new AstSymbolExpr('x');
+    const condition = new BinaryExpr(
+      initializer,
+      createToken(TokenKind.LT),
+      createNumberLiteral(20)
+    );
+    const assignment = new AstAssignment(
+      initializer,
+      new BinaryExpr(
+        initializer,
+        createToken(TokenKind.PLUS),
+        createNumberLiteral(2)
+      )
+    );
+    const mockStmt = new MockStmt();
+    let count = 0;
+    vi.spyOn(mockStmt, 'eval').mockImplementation((env) => {
+      count += 1;
+    })
+    const forStmt = new ForStatement(initializer, condition, assignment, [new BreakStmt(), mockStmt]);
+    const f2 = new ForStatement(initializer, condition, assignment, [mockStmt]);
+    forStmt.eval(env);
+    expect(count).toBe(0);
+    env.insert('x', createNumberLiteral(0))
+    f2.eval(env);
+    expect(count).not.toBe(0);
+  })
+  it('Continue', ()=>{
+    const env = new Env(null);
+    env.insert('x', createNumberLiteral(0));
+    const initializer = new AstSymbolExpr('x');
+    const condition = new BinaryExpr(
+      initializer,
+      createToken(TokenKind.LT),
+      createNumberLiteral(20)
+    );
+    const assignment = new AstAssignment(
+      initializer,
+      new BinaryExpr(
+        initializer,
+        createToken(TokenKind.PLUS),
+        createNumberLiteral(2)
+      )
+    );
+    const mockStmt = new MockStmt();
+    let count = 0;
+    vi.spyOn(mockStmt, 'eval').mockImplementation((env) => {
+      count += 1;
+    })
+    const forStmt = new ForStatement(initializer, condition, assignment, [new ContinueStmt(), mockStmt]);
+    const f2 = new ForStatement(initializer, condition, assignment, [mockStmt]);
+    forStmt.eval(env);
+    expect(count).toBe(0);
+    env.insert('x', createNumberLiteral(0))
+    f2.eval(env);
+    expect(count).not.toBe(0);
+  })
 })
