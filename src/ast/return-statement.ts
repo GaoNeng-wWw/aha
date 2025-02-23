@@ -1,3 +1,4 @@
+import { RETURN } from "@/constant";
 import { Env } from "./env";
 import { AstExpr, AstStmt } from "./node";
 
@@ -9,7 +10,7 @@ export class ReturnStatement extends AstStmt{
     super();
   }
   eval(env: Env): unknown {
-    env.insert('@ret@', true);
+    env.insert(RETURN, true);
     return this.value.eval(env);
   }
 }

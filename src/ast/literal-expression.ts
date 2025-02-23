@@ -1,9 +1,19 @@
-import { is, isMany } from "@/utils";
+import { isMany } from "@/utils";
 import { Env } from "./env";
 import { AstExpr } from "./node";
 import { ObjectLiteral } from "./object-literal";
 
-export class AstNumberLiteral extends AstExpr {
+export class AstLiteral extends AstExpr {
+  public name = 'Literal'
+  constructor(){
+    super()
+  }
+  eval(env: Env): unknown {
+    return;
+  }
+}
+
+export class AstNumberLiteral extends AstLiteral {
   public name = 'Number Literal';
   constructor(public val: number){
     super();
@@ -13,7 +23,7 @@ export class AstNumberLiteral extends AstExpr {
   }
 }
 
-export class AstBooleanLiteral extends AstExpr {
+export class AstBooleanLiteral extends AstLiteral {
   public name = 'Boolean Literal';
   constructor(
     public val: string
@@ -25,7 +35,7 @@ export class AstBooleanLiteral extends AstExpr {
   }
 }
 
-export class AstStringLiteral extends AstExpr {
+export class AstStringLiteral extends AstLiteral {
   public name = 'String Literal';
   constructor(
     public val: string
@@ -37,7 +47,7 @@ export class AstStringLiteral extends AstExpr {
   }
 }
 
-export class AstSymbolExpr extends AstExpr {
+export class AstSymbolExpr extends AstLiteral {
   constructor(
     public val: string
   ){
@@ -52,7 +62,7 @@ export class AstSymbolExpr extends AstExpr {
   }
 }
 
-export class ArrayLiteral extends AstExpr {
+export class ArrayLiteral extends AstLiteral {
   public name = 'Array Literal';
   constructor(
     public contents: AstExpr[]
@@ -61,7 +71,7 @@ export class ArrayLiteral extends AstExpr {
   }
 }
 
-export class NullLiteral extends AstExpr{
+export class NullLiteral extends AstLiteral{
   public name = 'Null Literal';
   constructor(
     public val:string='null'

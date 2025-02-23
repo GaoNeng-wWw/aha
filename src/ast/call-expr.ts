@@ -4,6 +4,7 @@ import { AstExpr} from "./node";
 import { AstSymbolExpr, NullLiteral } from "./literal-expression";
 import { FunctionDeclStmt } from "./function-declaration-stmt";
 import { FunctionExpr } from "./function-expr";
+import { BREAK, RETURN } from "@/constant";
 
 export class CallExpr extends AstExpr {
   public name = 'Call Expression'
@@ -39,9 +40,9 @@ export class CallExpr extends AstExpr {
     let ret: unknown = new NullLiteral();
     for (const stmt of body) {
       ret = stmt.eval(fnEnv);
-      if (fnEnv.has('@ret@')){
-        fnEnv.remove('@ret@');
-        break;
+      if (fnEnv.has(RETURN)){
+        fnEnv.remove(RETURN);
+        return ret;
       }
     }
     return ret;
