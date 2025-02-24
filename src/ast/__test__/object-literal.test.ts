@@ -28,5 +28,5 @@ describe('Object Literal', ()=>{
 it('Property', ()=>{
   const p = new Property('key', createNumberLiteral(1));
   const env = new Env();
-  expect(p.eval(env)).toBe(p)
+  expect(p.eval(env)).toBe(1)
 })

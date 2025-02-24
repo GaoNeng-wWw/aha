@@ -5,7 +5,9 @@ import { ObjectLiteral } from "./object-literal";
 
 export class AstLiteral extends AstExpr {
   public name = 'Literal'
-  constructor(){
+  public val: unknown
+  constructor(
+  ){
     super()
   }
   eval(env: Env): unknown {
@@ -74,11 +76,10 @@ export class ArrayLiteral extends AstLiteral {
 export class NullLiteral extends AstLiteral{
   public name = 'Null Literal';
   constructor(
-    public val:string='null'
   ){
     super();
   }
   eval(): unknown {
-    return this.val;
+    return 'null';
   }
 }
