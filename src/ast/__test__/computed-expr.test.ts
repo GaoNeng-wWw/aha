@@ -26,6 +26,31 @@ describe('Computed Expression', ()=>{
     env = new Env();
   })
   describe('Mix', ()=>{
+    it('When nested, if not reaching the bottom, return the current value if it exists', () => {
+      const obj = createNestObject(
+      [
+        createProperty(
+        'inner',
+        new ArrayLiteral(
+          [
+          new ObjectLiteral(
+            [
+            createProperty('arr-inner', createNumberLiteral(2))
+            ]
+          ),
+          createNumberLiteral(1)
+          ]
+        )
+        )
+      ]
+      )
+      const select = new ComputedExpr(
+      obj,
+      createStringLiteral('outer'),
+      );
+      expect(select.eval(env)).instanceOf(ObjectLiteral);
+      expect((select.eval(env) as ObjectLiteral).properties[0].id).toBe('mid');
+    })
     it('Nest', ()=>{
       const obj = createNestObject(
         [
