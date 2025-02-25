@@ -16,6 +16,18 @@
     private _eval(env:Env, object: AstExpr, property: AstExpr): AstExpr{
       let value = object;
       let key = property;
+      if (is(value, AstSymbolExpr)){
+        const maybeObjectOrArray = value.eval(env) as ObjectLiteral | ArrayLiteral;
+        if (!is(maybeObjectOrArray, ObjectLiteral) && !Array.isArray(maybeObjectOrArray)){
+          return new NullLiteral()
+        }
+        if (is(maybeObjectOrArray, ObjectLiteral)) {
+          value = maybeObjectOrArray;
+        }
+        if (Array.isArray(maybeObjectOrArray)){
+          value = new ArrayLiteral(maybeObjectOrArray);
+        }
+      }
       if (is(value, AstLiteral)){
         return value;
       }

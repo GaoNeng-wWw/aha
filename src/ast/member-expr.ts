@@ -19,6 +19,13 @@ export class MemberExpr extends AstExpr{
   ): AstNode {
     let value = member;
     let key = property;
+    if (is(value, AstSymbolExpr)) {
+      const maybeObject = value.eval(env);
+      if (!is(maybeObject,ObjectLiteral)){
+        throw new Error(`Member expression only can used for object`)
+      }
+      value = maybeObject;
+    }
     if (is(value, AstLiteral)){
       return value;
     }
