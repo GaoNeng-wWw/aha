@@ -24,8 +24,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.AND),
       createNumberLiteral(2)
     );
-    const res = expr.eval(new Env(null));
-    expect(res).toBe(1 & 2)
+    const res = expr.eval(new Env(null)) as AstNumberLiteral;
+    expect(res.eval()).toBe(1 & 2)
   })
   
   it('OR', ()=>{
@@ -34,8 +34,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.OR),
       createNumberLiteral(2)
     );
-    const res = expr.eval(new Env(null));
-    expect(res).toBe(1 | 2)
+    const res = expr.eval(new Env(null)) as AstNumberLiteral;;
+    expect(res.eval()).toBe(1 | 2)
   })
 
   it('should evaluate addition', () => {
@@ -44,8 +44,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.PLUS),
       createNumberLiteral(2)
     );
-    const result = expr.eval(new Env(null));
-    expect(result).toBe(3);
+    const result = expr.eval(new Env(null)) as AstNumberLiteral;
+    expect(result.eval()).toBe(3);
   });
 
   it('should evaluate subtraction', () => {
@@ -54,8 +54,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.DASH),
       createNumberLiteral(3)
     );
-    const result = expr.eval(new Env(null));
-    expect(result).toBe(2);
+    const result = expr.eval(new Env(null)) as AstNumberLiteral;
+    expect(result.eval()).toBe(2);
   });
 
   it('should evaluate multiplication', () => {
@@ -64,8 +64,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.STAR),
       createNumberLiteral(3)
     );
-    const result = expr.eval(new Env(null));
-    expect(result).toBe(12);
+    const result = expr.eval(new Env(null)) as AstNumberLiteral;
+    expect(result.eval()).toBe(12);
   });
 
   it('should evaluate division', () => {
@@ -74,8 +74,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.SLASH),
       createNumberLiteral(2)
     );
-    const result = expr.eval(new Env(null));
-    expect(result).toBe(5);
+    const result = expr.eval(new Env(null)) as AstNumberLiteral;
+    expect(result.eval()).toBe(5);
   });
 
   it('should evaluate modulus', () => {
@@ -84,8 +84,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.PERCENT),
       createNumberLiteral(3)
     );
-    const result = expr.eval(new Env(null));
-    expect(result).toBe(1);
+    const result = expr.eval(new Env(null)) as AstNumberLiteral;
+    expect(result.eval()).toBe(1);
   });
 
   it('should not evaluate logical AND', () => {
@@ -103,7 +103,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.LOGIC_AND),
       createBooleanLiteral(true)
     );
-    expect(expr.eval(new Env(null))).toBe(true);
+    const res = expr.eval(new Env(null));
+    expect((res as AstBooleanLiteral).eval()).toBe(true);
   });
 
   it('should not evaluate logical OR', () => {
@@ -122,7 +123,8 @@ describe('BinaryExpr', () => {
       createToken(TokenKind.LOGIC_OR),
       createBooleanLiteral(true)
     );
-    expect(expr.eval(new Env(null))).toBe(true)
+    const res = expr.eval(new Env(null)) as AstBooleanLiteral;
+    expect(res.eval()).toBe(true)
   });
 
   it('should evaluate equality', () => {

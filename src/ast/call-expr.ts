@@ -1,7 +1,7 @@
 import { is } from "@/utils";
 import { Env } from "./env";
 import { AstExpr} from "./node";
-import { AstSymbolExpr, NullLiteral } from "./literal-expression";
+import { AstLiteral, AstSymbolExpr, NullLiteral } from "./literal-expression";
 import { FunctionDeclStmt } from "./function-declaration-stmt";
 import { FunctionExpr } from "./function-expr";
 import { BREAK, RETURN } from "@/constant";
@@ -30,7 +30,7 @@ export class CallExpr extends AstExpr {
     if (this.argList.length < fn.params.length) {
       throw new Error(`Too few arguments, function requires ${fn.params.length} arguments, but received ${this.argList.length}`);
     }
-    const args = this.argList.map((arg) => arg.eval(fnEnv));
+    const args = this.argList.map((arg) => is(arg, AstLiteral) ? arg : arg.eval(fnEnv));
     for (let i=0;i<fn.params.length;i++){
       const name = fn.params[i].paramName;
       fnEnv.insert(name, args[i]);

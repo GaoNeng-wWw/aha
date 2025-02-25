@@ -3,7 +3,7 @@ import { createCall, createFn, createNumberLiteral, createToken } from "./utils"
 import { ParameterStmt } from "../parameter";
 import { IfStmt } from "../if-stmt";
 import { BinaryExpr } from "../bianry-expr";
-import { AstSymbolExpr, NullLiteral } from "../literal-expression";
+import { AstNumberLiteral, AstSymbolExpr, NullLiteral } from "../literal-expression";
 import { TokenKind } from "@/lexer";
 import { ReturnStatement } from "../return-statement";
 import { AstStmt } from "../node";
@@ -72,10 +72,10 @@ describe('Call', ()=>{
     expect(env.lookup('forLoop')).toBe(forLoop);
 
     const call1 = new CallExpr(new AstSymbolExpr('forLoop'), [createNumberLiteral(10)]);
-    expect(call1.eval(env)).toBe(5);
+    expect((call1.eval(env) as AstNumberLiteral).val).toBe(5);
 
     const call2 = new CallExpr(new AstSymbolExpr('forLoop'), [createNumberLiteral(3)]);
-    expect(call2.eval(env)).toBe(-1);
+    expect((call2.eval(env) as AstNumberLiteral).val).toBe(-1);
   });
   it('Nested If Statements', () => {
     const env = new Env();
@@ -112,19 +112,29 @@ describe('Call', ()=>{
     expect(env.lookup('nestedIf')).toBe(nestedIf);
 
     const call1 = new CallExpr(new AstSymbolExpr('nestedIf'), [createNumberLiteral(15)]);
-    expect(call1.eval(env)).toBe(1);
+    const call1Res = call1.eval(env);
+    expect(call1Res).instanceof(AstNumberLiteral);
+    expect((call1Res as AstNumberLiteral).eval()).toBe(1);
 
     const call2 = new CallExpr(new AstSymbolExpr('nestedIf'), [createNumberLiteral(25)]);
-    expect(call2.eval(env)).toBe(2);
+    const call2Res = call2.eval(env);
+    expect(call2Res).instanceof(AstNumberLiteral);
+    expect((call2Res as AstNumberLiteral).eval()).toBe(2);
 
     const call3 = new CallExpr(new AstSymbolExpr('nestedIf'), [createNumberLiteral(5)]);
-    expect(call3.eval(env)).toBe(0);
+    const call3Res = call3.eval(env);
+    expect(call3Res).instanceof(AstNumberLiteral);
+    expect((call3Res as AstNumberLiteral).eval()).toBe(0);
 
     const call4 = new CallExpr(new AstSymbolExpr('nestedIf'), [createNumberLiteral(10)]);
-    expect(call4.eval(env)).toBe(0);
+    const call4Res = call4.eval(env);
+    expect(call4Res).instanceof(AstNumberLiteral);
+    expect((call4Res as AstNumberLiteral).eval()).toBe(0)
 
     const call5 = new CallExpr(new AstSymbolExpr('nestedIf'), [createNumberLiteral(20)]);
-    expect(call5.eval(env)).toBe(2);
+    const call5Res = call5.eval(env);
+    expect(call5Res).instanceof(AstNumberLiteral);
+    expect((call5Res as AstNumberLiteral).eval()).toBe(2)
   });
   it('Function Expression recursion', ()=>{
     const fib = new FunctionExpr(
@@ -174,7 +184,8 @@ describe('Call', ()=>{
     f.eval(env);
     expect(env.lookup('fib')).toBe(fib);
     const res = new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(10)]).eval(env);
-    expect(res).toBe(_fib(10));
+    expect(res).instanceOf(AstNumberLiteral);
+    expect((res as AstNumberLiteral).eval()).toBe(_fib(10));
   })
   it('Except Identifier but found number', ()=>{
     const env = new Env();
@@ -271,6 +282,9 @@ describe('Call', ()=>{
       ]
     );
     fib.eval(env);
-    expect(new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(15)]).eval(env)).toBe(_fib(15));
+    const res = new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(15)]).eval(env);
+    expect(res).instanceOf(AstNumberLiteral);
+    expect((res as AstNumberLiteral).val).toBe(_fib(15))
+    // expect(res).toBe(_fib(15));
   })
 })

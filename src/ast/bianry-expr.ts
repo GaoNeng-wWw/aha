@@ -1,6 +1,8 @@
+import { is } from "@/utils";
 import { getTokenName, Token, TokenKind } from "../lexer";
 import { Env } from "./env";
-import { AstExpr } from "./node";
+import { AstBooleanLiteral, AstLiteral, AstNumberLiteral } from "./literal-expression";
+import { AstExpr, AstNode } from "./node";
 
 export class BinaryExpr extends AstExpr {
   public name = 'Binary Expression'
@@ -32,12 +34,12 @@ export class BinaryExpr extends AstExpr {
     }
 
   }
-  private logic(lhs: string, rhs: string, operator: TokenKind){
+  private logic(lhs: boolean, rhs: boolean, operator: TokenKind){
     switch (operator) {
       case TokenKind.LOGIC_AND:
-        return JSON.parse(lhs) && JSON.parse(rhs);
+        return lhs && rhs
       case TokenKind.LOGIC_OR:
-        return JSON.parse(lhs) || JSON.parse(rhs);
+        return lhs || rhs
       default:
         throw new Error(`Unknown Logic Operator ${getTokenName(operator)}`)
     }
@@ -62,22 +64,53 @@ export class BinaryExpr extends AstExpr {
     }
   }
   eval(env: Env): unknown {
-    const lhs = this.l.eval(env) as number | string;
-    const rhs = this.r.eval(env) as number | string;
-    if (this.operator.isMany(TokenKind.LT,TokenKind.LTE,TokenKind.GT,TokenKind.GTE,TokenKind.EQUALS,TokenKind.NOT_EQUALS)) {
-      return this.compare(lhs,rhs,this.operator.kind);
+    let _lhs = is(this.l, AstLiteral) ? this.l : this.l.eval(env);
+    let _rhs = is(this.r, AstLiteral) ? this.r : this.r.eval(env);
+    while (
+      !is(_lhs, AstLiteral) && is(_lhs, AstNode)
+    ) {
+      _lhs = _lhs.eval(env);
     }
+    while (
+      !is(_rhs, AstLiteral) && is(_rhs, AstNode)
+    ) {
+      _rhs = _rhs.eval(env);
+    }
+    if (!is(_lhs,  AstNode) || !is(_rhs, AstNode)){
+      process.exit(-1);
+    }
+    if (!is(_lhs, AstLiteral)){
+      throw new Error(`Except Literal but found ${_lhs.name}`)
+    }
+    if (!is(_rhs, AstLiteral)){
+      throw new Error(`Except Literal but found ${_rhs.name}`)
+    }
+    const lhs = _lhs;
+    const rhs = _rhs;
     if (this.operator.isMany(TokenKind.LOGIC_AND, TokenKind.LOGIC_OR)){
-      if (typeof lhs !== 'boolean' || typeof rhs !== 'boolean'){
+      if (!is(lhs, AstBooleanLiteral) ||!is(rhs,AstBooleanLiteral)){
         throw new Error('Logic operator only can used between at boolean')
       }
-      return this.logic(lhs, rhs, this.operator.kind);
+      return new AstBooleanLiteral(`${this.logic(lhs.eval(), rhs.eval(), this.operator.kind)}`);
     }
+    // let lhs = this.l.eval(env) as number | string | boolean | AstNode
+    // const rhs = this.r.eval(env) as number | string;
+    if (this.operator.isMany(TokenKind.LT,TokenKind.LTE,TokenKind.GT,TokenKind.GTE,TokenKind.EQUALS,TokenKind.NOT_EQUALS)) {
+      return this.compare(lhs.eval(env),rhs.eval(env),this.operator.kind);
+    }
+    // if (this.operator.isMany(TokenKind.LOGIC_AND, TokenKind.LOGIC_OR)){
+    //   if (typeof lhs !== 'boolean' || typeof rhs !== 'boolean'){
+    //     
+    //   }
+    //   
+    // }
     if (this.operator.isMany(TokenKind.PLUS, TokenKind.DASH,TokenKind.SLASH,TokenKind.STAR,TokenKind.PERCENT, TokenKind.AND, TokenKind.OR)){
-      if (typeof lhs !== 'number' || typeof rhs !== 'number'){
+      if (!is(lhs, AstNumberLiteral) || !is(rhs, AstNumberLiteral)){
         throw new Error('Math operator only can used between number')
       }
-      return this.math(lhs, rhs, this.operator.kind);
+      // if (typeof lhs !== 'number' || typeof rhs !== 'number'){
+      // }
+      return new AstNumberLiteral(this.math(lhs.eval(), rhs.eval(), this.operator.kind));
     }
     throw new Error('Invalid operator');
   }
