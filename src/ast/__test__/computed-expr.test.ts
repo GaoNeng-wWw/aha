@@ -115,8 +115,10 @@ describe('Computed Expression', ()=>{
           createNumberLiteral(4)
         ]
       )
+      const v1 = new VarDeclStmt('x', false, arr);
+      v1.eval(env);
       const computed = new ComputedExpr(
-        arr,
+        new AstSymbolExpr('x'),
         createNumberLiteral(0)
       )
       expect(computed.eval(env)).instanceOf(AstNumberLiteral)
