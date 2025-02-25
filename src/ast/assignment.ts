@@ -1,7 +1,7 @@
 import { is } from "@/utils";
 import { Env } from "./env";
 import { AstExpr } from "./node";
-import { AstSymbolExpr } from "./literal-expression";
+import { AstLiteral, AstSymbolExpr } from "./literal-expression";
 
 export class AstAssignment extends AstExpr {
   public name = 'Assignment'
@@ -16,7 +16,7 @@ export class AstAssignment extends AstExpr {
       throw new Error('Invalid assignment target');
     }
     const id = this.identifier;
-    const value = this.value.eval(env);
+    const value = is(this.value, AstLiteral) ? this.value : this.value.eval(env);
     env.insert(id.val,value);
     return value
   }

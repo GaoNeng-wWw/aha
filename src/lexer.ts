@@ -51,7 +51,8 @@ export enum TokenKind {
   ELSE,
   FOR,
   WHILE,
-  RETURN
+  RETURN,
+  NULL
 }
 
 
