@@ -1,3 +1,4 @@
+import { Env } from "./env";
 import { AstExpr, AstStmt } from "./node";
 
 export class ExprStmt extends AstStmt {
@@ -6,5 +7,8 @@ export class ExprStmt extends AstStmt {
     public expr: AstExpr
   ){
     super();
+  }
+  eval(env: Env): unknown {
+    return this.expr.eval(env)
   }
 }
