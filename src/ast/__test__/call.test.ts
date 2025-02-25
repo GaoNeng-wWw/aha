@@ -285,6 +285,5 @@ describe('Call', ()=>{
     const res = new CallExpr(new AstSymbolExpr('fib'), [createNumberLiteral(15)]).eval(env);
     expect(res).instanceOf(AstNumberLiteral);
     expect((res as AstNumberLiteral).val).toBe(_fib(15))
-    // expect(res).toBe(_fib(15));
   })
 })

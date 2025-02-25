@@ -15,10 +15,20 @@ export class Env {
     }
     return this.parent?.lookup(name, depth - 1) ?? null;
   }
+  private resolve(name: string): Env | undefined{
+    return this.env.has(name) ? this : this.parent?.resolve(name);
+  }
   insert(
     name: string,
     node: unknown
   ){
+    // let env:Env|null = this;
+    // while (env && !env.has(name)){
+    //   env = env.parent;
+    // }
+    // if (env?.parent){
+    //   return env.env.set(name, node);
+    // }
     return this.env.set(name,node);
   }
   has(name: string, depth: number = 0):boolean {
