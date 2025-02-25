@@ -1,7 +1,6 @@
-import { isMany } from "@/utils";
+import { is } from "@/utils";
 import { Env } from "./env";
-import { AstExpr, AstStmt } from "./node";
-import { ObjectLiteral } from "./object-literal";
+import { AstExpr, AstNode, AstStmt } from "./node";
 
 export class AstLiteral extends AstExpr {
   public name = 'Literal'
@@ -71,8 +70,28 @@ export class ArrayLiteral extends AstStmt {
   ){
     super();
   }
-  eval(env: Env): unknown {
-    return this.contents
+  eval(env: Env): AstNode[] {
+    const contents = this.contents.map((content) => {
+      if (is(content, AstLiteral)){
+        if (is(content, AstStringLiteral)){
+          return new AstStringLiteral(content.eval());
+        }
+        if (is(content, AstNumberLiteral)){
+          return new AstNumberLiteral(content.eval());
+        }
+        if (is(content, AstBooleanLiteral)){
+          return new AstBooleanLiteral(`${content.eval()}`);
+        }
+        if (is(content, ArrayLiteral)) {
+          return new ArrayLiteral(content.eval(env) as AstNode[]);
+        }
+      }
+      if (is(content, AstSymbolExpr)) {
+        return content.eval(env) as AstNode;
+      }
+      return content;
+    })
+    return contents;
   }
 }
 
