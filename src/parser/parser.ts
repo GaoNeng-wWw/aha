@@ -109,6 +109,10 @@ export class Parser {
       case TokenKind.BOOLEAN: {
         return new AstBooleanLiteral(this.next().value);
       }
+      case TokenKind.NULL: {
+        this.next();
+        return new NullLiteral();
+      }
       default: {
         throw new Error(`Cannot create primary expr from ${TokenKind[this.currentTokenKind()]}`)
       }
@@ -372,6 +376,7 @@ export class Parser {
     this.nud(TokenKind.IDENTIFIER, BP.PRIMAR, this.parsePrimaryExpr);
     this.nud(TokenKind.OPEN_BRACKET, BP.PRIMAR, this.parseArrayLiteral);
     this.nud(TokenKind.OPEN_CURLY, BP.PRIMAR, this.parseObjectLiteral);
+    this.nud(TokenKind.NULL,BP.PRIMAR,this.parsePrimaryExpr);
     
     this.nud(TokenKind.DASH, BP.UNARY, this.parsePrefixExpr);
     this.nud(TokenKind.NOT, BP.UNARY, this.parsePrefixExpr);
