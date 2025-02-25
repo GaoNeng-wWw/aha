@@ -1,9 +1,9 @@
   import { is } from "@/utils";
   import { Env } from "./env";
-  import { AstExpr, AstNode } from "./node";
-  import { AstLiteral, AstNumberLiteral, AstStringLiteral, NullLiteral } from "./literal-expression";
+  import { AstExpr } from "./node";
+  import { AstLiteral, AstNumberLiteral, AstStringLiteral, NullLiteral, ArrayLiteral, AstSymbolExpr } from "./literal-expression";
   import { ObjectLiteral, Property } from "./object-literal";
-  import { ArrayLiteral } from "./array-literal";
+
 
   export class ComputedExpr extends AstExpr {
     public name = 'Computed Expression';
@@ -43,11 +43,11 @@
       if (is(value, ArrayLiteral)) {
         const idx = key.eval(env);
         if (is(idx, AstNumberLiteral)){
-          value = value.contents[idx.eval()]
+          value = value.contents[idx.eval()] ?? new NullLiteral();
           return value;
         }
         if (typeof idx === 'number') {
-          value = value.contents[idx];
+          value = value.contents[idx] ?? new NullLiteral();
           return value;
         }
         if (typeof idx !== 'number'){

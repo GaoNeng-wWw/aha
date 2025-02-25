@@ -1,4 +1,6 @@
+import { is } from "@/utils";
 import { Env } from "./env";
+import { AstLiteral } from "./literal-expression";
 import { AstExpr, AstStmt } from "./node";
 
 export class VarDeclStmt extends AstStmt {
@@ -11,7 +13,7 @@ export class VarDeclStmt extends AstStmt {
     super();
   };
   eval(env: Env): AstExpr {
-    env.insert(this.id, this.value.eval(env));
+    env.insert(this.id, is(this.value, AstLiteral) ? this.value : this.value.eval(env));
     return this.value;
   }
 }

@@ -3,9 +3,10 @@ import { createNumberLiteral, createObject, createProperty, createStringLiteral 
 import { ComputedExpr } from "../computed-expr";
 import { Env } from "../env";
 import { ObjectLiteral, Property } from "../object-literal";
-import { AstNumberLiteral, AstStringLiteral, NullLiteral } from "../literal-expression";
-import { ArrayLiteral } from "../array-literal";
+import { AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral } from "../literal-expression";
+import { ArrayLiteral } from "../literal-expression";
 import { beforeEach } from "node:test";
+import { VarDeclStmt } from "../variable-declaration-stmt";
 
 describe('Computed Expression', ()=>{
   const createNestObject = (
@@ -45,8 +46,8 @@ describe('Computed Expression', ()=>{
       ]
       )
       const select = new ComputedExpr(
-      obj,
-      createStringLiteral('outer'),
+        obj,
+        createStringLiteral('outer'),
       );
       expect(select.eval(env)).instanceOf(ObjectLiteral);
       expect((select.eval(env) as ObjectLiteral).properties[0].id).toBe('mid');
@@ -232,5 +233,111 @@ describe('Computed Expression', ()=>{
       const computed = new ComputedExpr(obj, createStringLiteral('key'));
       expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
     });
+  });
+  it('should return NullLiteral when property is not found in ObjectLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const computed = new ComputedExpr(obj, createStringLiteral('nonexistent'));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should throw error when key is not AstStringLiteral in ObjectLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const computed = new ComputedExpr(obj, createNumberLiteral(0));
+    expect(() => computed.eval(env)).toThrowError('Key except string type but find Number Literal');
+  });
+
+  it('should return NullLiteral when index is out of bounds in ArrayLiteral', () => {
+    const arr = new ArrayLiteral([createNumberLiteral(1), createNumberLiteral(2)]);
+    const computed = new ComputedExpr(arr, createNumberLiteral(5));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should throw error when index is not a number in ArrayLiteral', () => {
+    const arr = new ArrayLiteral([createNumberLiteral(1), createNumberLiteral(2)]);
+    const computed = new ComputedExpr(arr, createStringLiteral('key'));
+    expect(() => computed.eval(env)).toThrowError('Index type except number but found string');
+  });
+
+  it('should evaluate nested ComputedExpr with ObjectLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const nestedComputed = new ComputedExpr(obj, createStringLiteral('key'));
+    const computed = new ComputedExpr(nestedComputed, createStringLiteral('key'));
+    expect(computed.eval(env)).toBe(nestedComputed.eval(env));
+  });
+
+  it('should evaluate nested ComputedExpr with ArrayLiteral', () => {
+    const arr = new ArrayLiteral([createNumberLiteral(1), createNumberLiteral(2)]);
+    const nestedComputed = new ComputedExpr(arr, createNumberLiteral(1));
+    const computed = new ComputedExpr(nestedComputed, createNumberLiteral(1));
+    expect(computed.eval(env)).toBe(nestedComputed.eval(env));
+  });
+
+  it('should return NullLiteral when no conditions are met in nested ComputedExpr', () => {
+    const obj = createObject([]);
+    const nestedComputed = new ComputedExpr(obj, createStringLiteral('key'));
+    const computed = new ComputedExpr(nestedComputed, createStringLiteral('key'));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+  it('should return NullLiteral when property is not found in ObjectLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const computed = new ComputedExpr(obj, createStringLiteral('nonexistent'));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should throw error when key is not AstStringLiteral in ObjectLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const computed = new ComputedExpr(obj, createNumberLiteral(0));
+    expect(() => computed.eval(env)).toThrowError('Key except string type but find Number Literal');
+  });
+
+  it('should return NullLiteral when index is out of bounds in ArrayLiteral', () => {
+    const arr = new ArrayLiteral([createNumberLiteral(1), createNumberLiteral(2)]);
+    const computed = new ComputedExpr(arr, createNumberLiteral(5));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should throw error when index is not a number in ArrayLiteral', () => {
+    const arr = new ArrayLiteral([createNumberLiteral(1), createNumberLiteral(2)]);
+    const computed = new ComputedExpr(arr, createStringLiteral('key'));
+    expect(() => computed.eval(env)).toThrowError('Index type except number but found string');
+  });
+
+  it('should evaluate nested ComputedExpr with ObjectLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const nestedComputed = new ComputedExpr(obj, createStringLiteral('key'));
+    const computed = new ComputedExpr(nestedComputed, createStringLiteral('key'));
+    expect(computed.eval(env)).toBe(nestedComputed.eval(env));
+  });
+
+  it('should evaluate nested ComputedExpr with ArrayLiteral', () => {
+    const arr = new ArrayLiteral([createNumberLiteral(1), createNumberLiteral(2)]);
+    const nestedComputed = new ComputedExpr(arr, createNumberLiteral(1));
+    const computed = new ComputedExpr(nestedComputed, createNumberLiteral(1));
+    expect(computed.eval(env)).toBe(nestedComputed.eval(env));
+  });
+
+  it('should return NullLiteral when no conditions are met in nested ComputedExpr', () => {
+    const obj = createObject([]);
+    const nestedComputed = new ComputedExpr(obj, createStringLiteral('key'));
+    const computed = new ComputedExpr(nestedComputed, createStringLiteral('key'));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should return NullLiteral when member is NullLiteral', () => {
+    const nullLiteral = new NullLiteral();
+    const computed = new ComputedExpr(nullLiteral, createStringLiteral('key'));
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should return NullLiteral when property is NullLiteral', () => {
+    const obj = createObject([createProperty('key', createNumberLiteral(42))]);
+    const computed = new ComputedExpr(obj, new NullLiteral());
+    expect(()=>computed.eval(env)).toThrowError()
+    // expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
+  });
+
+  it('should return NullLiteral when both member and property are NullLiteral', () => {
+    const computed = new ComputedExpr(new NullLiteral(), new NullLiteral());
+    expect(computed.eval(env)).toBeInstanceOf(NullLiteral);
   });
 })

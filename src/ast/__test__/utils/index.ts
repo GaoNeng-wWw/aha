@@ -1,4 +1,4 @@
-import { ArrayLiteral } from "@/ast/array-literal";
+import { ArrayLiteral } from "@/ast/literal-expression";
 import { CallExpr } from "@/ast/call-expr";
 import { ComputedExpr } from "@/ast/computed-expr";
 import { FunctionDeclStmt } from "@/ast/function-declaration-stmt";

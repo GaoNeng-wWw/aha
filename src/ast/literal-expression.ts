@@ -1,6 +1,6 @@
 import { isMany } from "@/utils";
 import { Env } from "./env";
-import { AstExpr } from "./node";
+import { AstExpr, AstStmt } from "./node";
 import { ObjectLiteral } from "./object-literal";
 
 export class AstLiteral extends AstExpr {
@@ -49,7 +49,7 @@ export class AstStringLiteral extends AstLiteral {
   }
 }
 
-export class AstSymbolExpr extends AstLiteral {
+export class AstSymbolExpr extends AstExpr {
   constructor(
     public val: string
   ){
@@ -64,12 +64,15 @@ export class AstSymbolExpr extends AstLiteral {
   }
 }
 
-export class ArrayLiteral extends AstLiteral {
+export class ArrayLiteral extends AstStmt {
   public name = 'Array Literal';
   constructor(
     public contents: AstExpr[]
   ){
     super();
+  }
+  eval(env: Env): unknown {
+    return this.contents
   }
 }
 
