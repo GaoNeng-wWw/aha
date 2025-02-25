@@ -10,7 +10,7 @@ export class AstLiteral extends AstExpr {
   ){
     super()
   }
-  eval(env: Env): unknown {
+  eval(env: Env): unknown{
     return;
   }
 }
@@ -32,7 +32,7 @@ export class AstBooleanLiteral extends AstLiteral {
   ){
     super();
   }
-  eval() {
+  eval():boolean {
     return JSON.parse(this.val);
   }
 }
@@ -57,9 +57,9 @@ export class AstSymbolExpr extends AstExpr {
   }
   eval(env: Env){
     const maybeExp = env.lookup(this.val);
-    if (isMany(maybeExp, [AstNumberLiteral,AstBooleanLiteral,AstStringLiteral,ArrayLiteral,ObjectLiteral])){
-      return maybeExp.eval(env);
-    }
+    // if (isMany(maybeExp, [AstNumberLiteral,AstBooleanLiteral,AstStringLiteral,ArrayLiteral,ObjectLiteral])){
+    //   return maybeExp.eval(env);
+    // }
     return maybeExp;
   }
 }

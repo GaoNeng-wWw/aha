@@ -14,7 +14,7 @@ export class CallExpr extends AstExpr {
   ){
     super();
   }
-  eval(env:Env): unknown {
+  eval(env:Env): AstExpr {
     if (!is(this.method, AstSymbolExpr)){
       throw new Error(`Except identifier, but found ${this.method.name}`)
     }
@@ -40,12 +40,12 @@ export class CallExpr extends AstExpr {
     for (const stmt of body) {
       stmt.eval(fnEnv);
       if (fnEnv.has(RETURN) || fnEnv.globalEnv.has(RETURN)){
-        const val = fnEnv.globalEnv.lookup(RETURN);
+        const val = fnEnv.globalEnv.lookup(RETURN) as AstExpr | null;
         fnEnv.remove(RETURN);
         fnEnv.globalEnv.remove(RETURN);
-        return val;
+        return val ? val : new NullLiteral();
       }
     }
-    return new NullLiteral();;
+    return new NullLiteral();
   }
 }
