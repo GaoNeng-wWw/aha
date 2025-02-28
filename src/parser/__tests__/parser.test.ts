@@ -7,7 +7,7 @@ import { BinaryExpr } from "@/ast/bianry-expr";
 import { CallExpr } from "@/ast/call-expr";
 import { ExprStmt } from "@/ast/expression-stmt";
 import { MemberExpr } from "@/ast/member-expr";
-import { AstNumberLiteral, AstSymbolExpr, NullLiteral } from "@/ast/number-expr";
+import { AstNumberLiteral, AstSymbolExpr, NullLiteral } from "@/ast/literal-expression";
 import { BlockStmt } from "@/ast/block-stmt";
 import { AstNode } from "@/ast/node";
 import { ComputedExpr } from "@/ast/computed-expr";
@@ -268,6 +268,19 @@ describe('Parser', ()=>{
     tokenTobeDefined(tokens);
     const parser = createParser(tokens);
     parser.run()
-    console.log(parser.dump())
   })
+  it('parse null literal', () => {
+    const lexer = createLexer(rules, 'let x <- null;');
+    const tokens = lexer.run();
+    tokenTobeDefined(tokens);
+    const parser = createParser(tokens);
+    parser.run();
+    const root = parser.getRoot();
+    expect(root).toBeDefined();
+    expect(root?.body.length).toBe(1);
+    const varDecl = root?.body[0] as VarDeclStmt;
+    expect(varDecl).toBeInstanceOf(VarDeclStmt);
+    expect(varDecl.id).toBe('x');
+    expect(varDecl.value).toBeInstanceOf(NullLiteral);
+  });
 })

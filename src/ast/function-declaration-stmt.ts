@@ -1,3 +1,4 @@
+import { Env } from "./env";
 import { AstStmt } from "./node";
 import { ParameterStmt } from "./parameter";
 
@@ -9,5 +10,9 @@ export class FunctionDeclStmt extends AstStmt {
     public body: AstStmt[]
   ){
     super();
+  }
+  eval(env: Env): unknown {
+    env.insert(this.fnName, this);
+    return;
   }
 }

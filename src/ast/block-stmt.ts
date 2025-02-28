@@ -1,4 +1,5 @@
-import { AstNode, AstStmt } from "./node";
+import { Env } from "./env";
+import { AstStmt } from "./node";
 
 export class BlockStmt extends AstStmt {
   public name = 'Block Statement';
@@ -7,7 +8,7 @@ export class BlockStmt extends AstStmt {
   ){
     super();
   }
-  eval(): unknown {
-    return;
+  eval(env: Env): unknown {
+    return this.body.forEach(stmt => stmt.eval(env));
   }
 }

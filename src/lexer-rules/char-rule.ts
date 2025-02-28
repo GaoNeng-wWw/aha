@@ -43,7 +43,8 @@ const charTokens:[RegExp, TokenKind,string][] = [
   [/^else/, TokenKind.ELSE, 'else'],
   [/^for/, TokenKind.FOR, 'for'],
   [/^while/, TokenKind.WHILE, 'while'],
-  [/^return/, TokenKind.RETURN, 'return']
+  [/^return/, TokenKind.RETURN, 'return'],
+  [/^null/, TokenKind.NULL, 'null'],
 ];
 
 export const charRules:LexerRule[] = charTokens.map(

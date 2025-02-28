@@ -1,3 +1,4 @@
+import { Env } from "./env";
 import { AstStmt } from "./node";
 
 export class ParameterStmt extends AstStmt{
@@ -6,5 +7,8 @@ export class ParameterStmt extends AstStmt{
     public paramName: string
   ){
     super();
+  }
+  eval(env: Env): unknown {
+    return;
   }
 }

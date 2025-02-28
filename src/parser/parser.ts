@@ -8,7 +8,7 @@ import { FunctionDeclStmt } from "../ast/function-declaration-stmt";
 import { FunctionExpr } from "../ast/function-expr";
 import { IfStmt } from "../ast/if-stmt";
 import { AstExpr, AstStmt } from "../ast/node";
-import {  ArrayLiteral, AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/number-expr";
+import {  ArrayLiteral, AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/literal-expression";
 import { ParameterStmt } from "../ast/parameter";
 import { PrefixExpr } from "../ast/prefix-expr";
 import { VarDeclStmt } from "../ast/variable-declaration-stmt";
@@ -108,6 +108,10 @@ export class Parser {
       }
       case TokenKind.BOOLEAN: {
         return new AstBooleanLiteral(this.next().value);
+      }
+      case TokenKind.NULL: {
+        this.next();
+        return new NullLiteral();
       }
       default: {
         throw new Error(`Cannot create primary expr from ${TokenKind[this.currentTokenKind()]}`)
@@ -372,6 +376,7 @@ export class Parser {
     this.nud(TokenKind.IDENTIFIER, BP.PRIMAR, this.parsePrimaryExpr);
     this.nud(TokenKind.OPEN_BRACKET, BP.PRIMAR, this.parseArrayLiteral);
     this.nud(TokenKind.OPEN_CURLY, BP.PRIMAR, this.parseObjectLiteral);
+    this.nud(TokenKind.NULL,BP.PRIMAR,this.parsePrimaryExpr);
     
     this.nud(TokenKind.DASH, BP.UNARY, this.parsePrefixExpr);
     this.nud(TokenKind.NOT, BP.UNARY, this.parsePrefixExpr);
