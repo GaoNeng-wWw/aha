@@ -8,7 +8,6 @@ export class ContinueStmt extends AstStmt {
     super();
   }
   eval(env: Env): unknown {
-    env.insert(CONTINUE, true);
-    return ;
+    return;
   }
 }

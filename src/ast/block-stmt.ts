@@ -9,6 +9,6 @@ export class BlockStmt extends AstStmt {
     super();
   }
   eval(env: Env): unknown {
-    return this.body.forEach(stmt => stmt.eval(env));
+    return;
   }
 }

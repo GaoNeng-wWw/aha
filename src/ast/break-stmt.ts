@@ -8,7 +8,6 @@ export class BreakStmt extends AstStmt {
     super();
   }
   eval(env: Env): unknown {
-    env.insert(BREAK, true);
     return ;
   }
 }

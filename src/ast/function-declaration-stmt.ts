@@ -12,7 +12,6 @@ export class FunctionDeclStmt extends AstStmt {
     super();
   }
   eval(env: Env): unknown {
-    env.insert(this.fnName, this);
     return;
   }
 }

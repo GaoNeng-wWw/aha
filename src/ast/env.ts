@@ -22,13 +22,6 @@ export class Env {
     name: string,
     node: unknown
   ){
-    // let env:Env|null = this;
-    // while (env && !env.has(name)){
-    //   env = env.parent;
-    // }
-    // if (env?.parent){
-    //   return env.env.set(name, node);
-    // }
     return this.env.set(name,node);
   }
   has(name: string, depth: number = 0):boolean {

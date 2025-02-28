@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { Lexer, LexerRule, Token, TokenKind } from "../../lexer";
 import rules from '@/lexer-rules';
 import { Parser } from "../parser";
-import { AstAssignment } from "@/ast/assignment";
+import { Assignment } from "@/ast/assignment";
 import { BinaryExpr } from "@/ast/bianry-expr";
 import { CallExpr } from "@/ast/call-expr";
 import { ExprStmt } from "@/ast/expression-stmt";
 import { MemberExpr } from "@/ast/member-expr";
-import { AstNumberLiteral, AstSymbolExpr, NullLiteral } from "@/ast/literal-expression";
+import { NumberLiteral, Identifier, NullLiteral } from "@/ast/literal-expression";
 import { BlockStmt } from "@/ast/block-stmt";
 import { AstNode } from "@/ast/node";
 import { ComputedExpr } from "@/ast/computed-expr";
@@ -55,11 +55,11 @@ describe('Parser', ()=>{
         node
       ).toBeInstanceOf(ExprStmt)
       const exprStmt:ExprStmt = node as ExprStmt;
-      expect(exprStmt.expr).toBeInstanceOf(AstAssignment);
-      const assignment = exprStmt.expr as AstAssignment;
-      expect(assignment.identifier).toBeInstanceOf(AstSymbolExpr);
-      expect((assignment.identifier as AstSymbolExpr).val).toBe('x');
-      expect(assignment.value).toBeInstanceOf(AstNumberLiteral);
+      expect(exprStmt.expr).toBeInstanceOf(Assignment);
+      const assignment = exprStmt.expr as Assignment;
+      expect(assignment.identifier).toBeInstanceOf(Identifier);
+      expect((assignment.identifier as Identifier).val).toBe('x');
+      expect(assignment.value).toBeInstanceOf(NumberLiteral);
     }
     valid(body[0])
     valid(body[1])
@@ -138,8 +138,8 @@ describe('Parser', ()=>{
     expect(exprStmt).toBeInstanceOf(ExprStmt);
     const memberExpr = exprStmt.expr as MemberExpr;
     expect(memberExpr).toBeInstanceOf(MemberExpr);
-    expect(memberExpr.member).toBeInstanceOf(AstSymbolExpr);
-    expect((memberExpr.member as AstSymbolExpr).val).toBe('obj');
+    expect(memberExpr.member).toBeInstanceOf(Identifier);
+    expect((memberExpr.member as Identifier).val).toBe('obj');
     expect(memberExpr.property).toBe('prop');
   });
   
@@ -156,10 +156,10 @@ describe('Parser', ()=>{
     expect(exprStmt).toBeInstanceOf(ExprStmt);
     const computedExpr = exprStmt.expr as ComputedExpr;
     expect(computedExpr).toBeInstanceOf(ComputedExpr);
-    expect(computedExpr.member).toBeInstanceOf(AstSymbolExpr);
-    expect((computedExpr.member as AstSymbolExpr).val).toBe('obj');
-    expect(computedExpr.property).toBeInstanceOf(AstSymbolExpr);
-    expect((computedExpr.property as AstSymbolExpr).val).toBe('prop');
+    expect(computedExpr.member).toBeInstanceOf(Identifier);
+    expect((computedExpr.member as Identifier).val).toBe('obj');
+    expect(computedExpr.property).toBeInstanceOf(Identifier);
+    expect((computedExpr.property as Identifier).val).toBe('prop');
   });
   
   it('parse prefix expression', () => {
@@ -176,8 +176,8 @@ describe('Parser', ()=>{
     const prefixExpr = exprStmt.expr as PrefixExpr;
     expect(prefixExpr).toBeInstanceOf(PrefixExpr);
     expect(prefixExpr.operator.kind).toBe(TokenKind.DASH);
-    expect(prefixExpr.rhs).toBeInstanceOf(AstSymbolExpr);
-    expect((prefixExpr.rhs as AstSymbolExpr).val).toBe('x');
+    expect(prefixExpr.rhs).toBeInstanceOf(Identifier);
+    expect((prefixExpr.rhs as Identifier).val).toBe('x');
   });
   
   it('parse call expression', () => {
@@ -193,13 +193,13 @@ describe('Parser', ()=>{
     expect(exprStmt).toBeInstanceOf(ExprStmt);
     const callExpr = exprStmt.expr as CallExpr;
     expect(callExpr).toBeInstanceOf(CallExpr);
-    expect(callExpr.method).toBeInstanceOf(AstSymbolExpr);
-    expect((callExpr.method as AstSymbolExpr).val).toBe('foo');
+    expect(callExpr.method).toBeInstanceOf(Identifier);
+    expect((callExpr.method as Identifier).val).toBe('foo');
     expect(callExpr.argList.length).toBe(2);
-    expect(callExpr.argList[0]).toBeInstanceOf(AstNumberLiteral);
-    expect((callExpr.argList[0] as AstNumberLiteral).val).toBe(1);
-    expect(callExpr.argList[1]).toBeInstanceOf(AstNumberLiteral);
-    expect((callExpr.argList[1] as AstNumberLiteral).val).toBe(2);
+    expect(callExpr.argList[0]).toBeInstanceOf(NumberLiteral);
+    expect((callExpr.argList[0] as NumberLiteral).val).toBe(1);
+    expect(callExpr.argList[1]).toBeInstanceOf(NumberLiteral);
+    expect((callExpr.argList[1] as NumberLiteral).val).toBe(2);
   });
   
   it('parse grouping expression', () => {
@@ -217,12 +217,12 @@ describe('Parser', ()=>{
     expect(binaryExpr).toBeInstanceOf(BinaryExpr);
     expect(binaryExpr.l).toBeInstanceOf(BinaryExpr);
     const leftBinaryExpr = binaryExpr.l as BinaryExpr;
-    expect(leftBinaryExpr.l).toBeInstanceOf(AstNumberLiteral);
-    expect((leftBinaryExpr.l as AstNumberLiteral).val).toBe(1);
-    expect(leftBinaryExpr.r).toBeInstanceOf(AstNumberLiteral);
-    expect((leftBinaryExpr.r as AstNumberLiteral).val).toBe(2);
-    expect(binaryExpr.r).toBeInstanceOf(AstNumberLiteral);
-    expect((binaryExpr.r as AstNumberLiteral).val).toBe(3);
+    expect(leftBinaryExpr.l).toBeInstanceOf(NumberLiteral);
+    expect((leftBinaryExpr.l as NumberLiteral).val).toBe(1);
+    expect(leftBinaryExpr.r).toBeInstanceOf(NumberLiteral);
+    expect((leftBinaryExpr.r as NumberLiteral).val).toBe(2);
+    expect(binaryExpr.r).toBeInstanceOf(NumberLiteral);
+    expect((binaryExpr.r as NumberLiteral).val).toBe(3);
   });
   it('parse closure', ()=>{
     const lexer = createLexer(rules, `let x <- fn(){ let y <- 1; return fn(){return y;};};`)

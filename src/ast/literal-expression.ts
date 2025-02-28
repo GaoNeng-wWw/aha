@@ -2,7 +2,7 @@ import { is } from "@/utils";
 import { Env } from "./env";
 import { AstExpr, AstNode, AstStmt } from "./node";
 
-export class AstLiteral extends AstExpr {
+export class Literal extends AstExpr {
   public name = 'Literal'
   public val: unknown
   constructor(
@@ -14,52 +14,48 @@ export class AstLiteral extends AstExpr {
   }
 }
 
-export class AstNumberLiteral extends AstLiteral {
+export class NumberLiteral extends Literal {
   public name = 'Number Literal';
   constructor(public val: number){
     super();
   }
   eval(){
-    return this.val;
+    return
   }
 }
 
-export class AstBooleanLiteral extends AstLiteral {
+export class BooleanLiteral extends Literal {
   public name = 'Boolean Literal';
   constructor(
     public val: string
   ){
     super();
   }
-  eval():boolean {
-    return JSON.parse(this.val);
+  eval():unknown {
+    return;
   }
 }
 
-export class AstStringLiteral extends AstLiteral {
+export class StringLiteral extends Literal {
   public name = 'String Literal';
   constructor(
     public val: string
   ){
     super();
   }
-  eval(): string {
-    return this.val;
+  eval():unknown {
+    return;
   }
 }
 
-export class AstSymbolExpr extends AstExpr {
+export class Identifier extends AstExpr {
   constructor(
     public val: string
   ){
     super();
   }
   eval(env: Env){
-    const maybeExp = env.lookup(this.val);
-    // if (isMany(maybeExp, [AstNumberLiteral,AstBooleanLiteral,AstStringLiteral,ArrayLiteral,ObjectLiteral])){
-    //   return maybeExp.eval(env);
-    // }
-    return maybeExp;
+    return;
   }
 }
 
@@ -70,32 +66,12 @@ export class ArrayLiteral extends AstStmt {
   ){
     super();
   }
-  eval(env: Env): AstNode[] {
-    const contents = this.contents.map((content) => {
-      if (is(content, AstLiteral)){
-        if (is(content, AstStringLiteral)){
-          return new AstStringLiteral(content.eval());
-        }
-        if (is(content, AstNumberLiteral)){
-          return new AstNumberLiteral(content.eval());
-        }
-        if (is(content, AstBooleanLiteral)){
-          return new AstBooleanLiteral(`${content.eval()}`);
-        }
-        if (is(content, ArrayLiteral)) {
-          return new ArrayLiteral(content.eval(env) as AstNode[]);
-        }
-      }
-      if (is(content, AstSymbolExpr)) {
-        return content.eval(env) as AstNode;
-      }
-      return content;
-    })
-    return contents;
+  eval(env: Env): unknown {
+    return;
   }
 }
 
-export class NullLiteral extends AstLiteral{
+export class NullLiteral extends Literal{
   public name = 'Null Literal';
   constructor(
   ){

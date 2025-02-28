@@ -11,6 +11,6 @@ export class FunctionExpr extends AstExpr {
     super();
   }
   eval(env: Env): unknown {
-    return this;
+    return;
   }
 }
