@@ -1,5 +1,6 @@
+import { RETURN } from "@/constant";
 import { Env } from "./env";
-import { AstStmt } from "./node";
+import { AstNode, AstStmt } from "./node";
 
 export class BlockStmt extends AstStmt {
   public name = 'Block Statement';
@@ -8,7 +9,10 @@ export class BlockStmt extends AstStmt {
   ){
     super();
   }
-  eval(env: Env): unknown {
+  eval(env: Env): AstNode {
+    for (const body of this.body){
+      body.eval(env);
+    }
     return;
   }
 }

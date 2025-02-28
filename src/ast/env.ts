@@ -1,7 +1,7 @@
 import { AstNode } from "./node";
 
 export class Env {
-  private env: Map<string, AstNode>;
+  public env: Map<string, AstNode | null>;
   constructor(
     public parent: Env | null=null
   ){
@@ -9,7 +9,7 @@ export class Env {
   }
   define(
     name: string,
-    value: AstNode,
+    value: AstNode | null,
   ){
     this.env.set(name, value);
     return value;
@@ -20,7 +20,10 @@ export class Env {
     return value;
   }
   lookup(name: string){
-    return this.resolve(name)!.env.get(name);
+    return this.resolve(name)!.env.get(name)!;
+  }
+  remove(name: string) {
+    return this.resolve(name).env.delete(name)
   }
   has(name: string):boolean{
     if(this.env.has(name)){

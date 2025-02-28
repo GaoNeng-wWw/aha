@@ -1,6 +1,6 @@
 import { is } from "@/utils";
 import { Env } from "./env";
-import { AstExpr, AstStmt } from "./node";
+import { AstExpr, AstNode, AstStmt } from "./node";
 import { NumberLiteral } from "./literal-expression";
 
 export class ExprStmt extends AstStmt {
@@ -10,7 +10,7 @@ export class ExprStmt extends AstStmt {
   ){
     super();
   }
-  eval(env: Env): unknown {
-    return;
+  eval(env: Env): AstNode {
+    return this.expr.eval(env);
   }
 }

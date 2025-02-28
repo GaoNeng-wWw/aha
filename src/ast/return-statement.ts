@@ -1,6 +1,6 @@
 import { RETURN } from "@/constant";
 import { Env } from "./env";
-import { AstExpr, AstStmt } from "./node";
+import { AstExpr, AstNode, AstStmt } from "./node";
 import { Literal } from "./literal-expression";
 import { is } from "@/utils";
 
@@ -11,7 +11,9 @@ export class ReturnStatement extends AstStmt{
   ){
     super();
   }
-  eval(env: Env): unknown {
-    return;
+  eval(env: Env): AstNode {
+    const value = this.value.eval(env);
+    env.assign(RETURN, value);
+    return value;
   }
 }

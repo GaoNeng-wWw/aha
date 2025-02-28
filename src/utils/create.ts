@@ -5,7 +5,9 @@ import { NumberLiteral, BooleanLiteral, Identifier, StringLiteral } from "@/ast/
 import { AstExpr, AstStmt } from "@/ast/node";
 import { ObjectLiteral, Property } from "@/ast/object-literal";
 import { ParameterStmt } from "@/ast/parameter";
-import { TokenKind, Token } from "@/lexer";
+import { TokenKind, Token, LexerRule, Lexer } from "@/lexer";
+import lexerRules from "@/lexer-rules";
+import { Parser } from "@/parser/parser";
 
 export const createToken = (kind: TokenKind): Token => new Token(kind, '');
 export const createNumberLiteral = (value: number) => new NumberLiteral(value);
@@ -19,3 +21,10 @@ export const createFn = (fnName: string, params: ParameterStmt[], body: AstStmt[
 export const createProperty = (key: string, value: AstExpr) => new Property(key, value);
 export const createObject = (properties: Property[]) => new ObjectLiteral(properties);
 export const createArray = (values: AstExpr[]) => new ArrayLiteral(values);
+export const createProgram = (code: string, rules: LexerRule[] = lexerRules) => {
+  const lexer = new Lexer(rules,code);
+  const tokens = lexer.run();
+  const parser = new Parser(tokens);
+  const root = parser.run();
+  return root;
+}
