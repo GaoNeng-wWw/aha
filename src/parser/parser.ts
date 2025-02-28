@@ -7,8 +7,8 @@ import { ExprStmt } from "../ast/expression-stmt";
 import { FunctionDeclStmt } from "../ast/function-declaration-stmt";
 import { FunctionExpr } from "../ast/function-expr";
 import { IfStmt } from "../ast/if-stmt";
-import { AstExpr, AstStmt } from "../ast/node";
-import {  ArrayLiteral, BooleanLiteral, NumberLiteral, StringLiteral, Identifier, NullLiteral, } from "../ast/literal-expression";
+import { AstExpr, AstStmt, NullLiteral } from "../ast/node";
+import {  ArrayLiteral, BooleanLiteral, NumberLiteral, StringLiteral, Identifier, } from "../ast/literal-expression";
 import { ParameterStmt } from "../ast/parameter";
 import { PrefixExpr } from "../ast/prefix-expr";
 import { VarDeclStmt } from "../ast/variable-declaration-stmt";
@@ -112,6 +112,7 @@ export class Parser {
       case TokenKind.NULL: {
         this.next();
         return new NullLiteral();
+        // return new NullLiteral();
       }
       default: {
         throw new Error(`Cannot create primary expr from ${TokenKind[this.currentTokenKind()]}`)

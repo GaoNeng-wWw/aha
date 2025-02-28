@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { AstNode, NullLiteral } from "@/ast/node";
 import { Lexer, LexerRule, Token, TokenKind } from "../../lexer";
 import rules from '@/lexer-rules';
 import { Parser } from "../parser";
@@ -7,9 +8,8 @@ import { BinaryExpr } from "@/ast/bianry-expr";
 import { CallExpr } from "@/ast/call-expr";
 import { ExprStmt } from "@/ast/expression-stmt";
 import { MemberExpr } from "@/ast/member-expr";
-import { NumberLiteral, Identifier, NullLiteral } from "@/ast/literal-expression";
+import { NumberLiteral, Identifier } from "@/ast/literal-expression";
 import { BlockStmt } from "@/ast/block-stmt";
-import { AstNode } from "@/ast/node";
 import { ComputedExpr } from "@/ast/computed-expr";
 import { FunctionDeclStmt } from "@/ast/function-declaration-stmt";
 import { IfStmt } from "@/ast/if-stmt";

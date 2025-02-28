@@ -1,16 +1,15 @@
-import { is } from "@/utils";
+import { is, isMany } from "@/utils";
 import { Env } from "./env";
-import { AstExpr, AstNode, AstStmt } from "./node";
+import { AstExpr, AstNode, AstStmt, NullLiteral } from "./node";
+import { AssertionError } from "assert";
 
-export class Literal extends AstExpr {
+export class Literal implements AstExpr {
   public name = 'Literal'
-  public val: unknown
+  public val: any;
   constructor(
-  ){
-    super()
-  }
-  eval(env: Env): unknown{
-    return;
+  ){}
+  eval(env: Env): AstNode {
+    return new NullLiteral();
   }
 }
 
@@ -19,20 +18,22 @@ export class NumberLiteral extends Literal {
   constructor(public val: number){
     super();
   }
-  eval(){
-    return
+  eval(env:Env): NumberLiteral{
+    return this;
   }
 }
 
 export class BooleanLiteral extends Literal {
   public name = 'Boolean Literal';
+  public val: boolean;
   constructor(
-    public val: string
+    private _val: string
   ){
     super();
+    this.val = JSON.parse(_val);
   }
-  eval():unknown {
-    return;
+  eval():BooleanLiteral {
+    return this;
   }
 }
 
@@ -43,8 +44,8 @@ export class StringLiteral extends Literal {
   ){
     super();
   }
-  eval():unknown {
-    return;
+  eval():StringLiteral {
+    return this;
   }
 }
 
@@ -54,30 +55,31 @@ export class Identifier extends AstExpr {
   ){
     super();
   }
-  eval(env: Env){
-    return;
+  eval(env: Env):Literal | AstNode{
+    const value = env.lookup(this.val);
+    if (is(value, Literal)){
+      return value;
+    }
+    if(!value){
+      process.exit(-1);
+    }
+    return value.eval(env) as AstNode;
   }
 }
 
 export class ArrayLiteral extends AstStmt {
   public name = 'Array Literal';
+  private _contents:AstNode[]
   constructor(
     public contents: AstExpr[]
   ){
     super();
+    this._contents = Array.from({length: this.contents.length});
   }
-  eval(env: Env): unknown {
-    return;
-  }
-}
-
-export class NullLiteral extends Literal{
-  public name = 'Null Literal';
-  constructor(
-  ){
-    super();
-  }
-  eval(): unknown {
-    return 'null';
+  eval(env: Env): ArrayLiteral {
+    for (let i=0;i<this.contents.length;i++){
+      this._contents[i] = this.contents[i].eval(env)!;
+    }
+    return this;
   }
 }

@@ -1,49 +1,43 @@
+import { AstNode } from "./node";
+
 export class Env {
-  private env: Map<string, unknown>;
+  private env: Map<string, AstNode>;
   constructor(
     public parent: Env | null=null
   ){
     this.env = new Map();
   }
-  lookup(
+  define(
     name: string,
-    depth: number = -1,
-  ): unknown | null{
-    const val = this.env.get(name) ?? null;
-    if (val !== null){
-      return val ?? null;
-    }
-    return this.parent?.lookup(name, depth - 1) ?? null;
-  }
-  private resolve(name: string): Env | undefined{
-    return this.env.has(name) ? this : this.parent?.resolve(name);
-  }
-  insert(
-    name: string,
-    node: unknown
+    value: AstNode,
   ){
-    return this.env.set(name,node);
+    this.env.set(name, value);
+    return value;
   }
-  has(name: string, depth: number = 0):boolean {
-    if (!this.parent || depth === 0){
-      return this.env.has(name);
+  assign(name: string, value: AstNode){
+    const env = this.resolve(name);
+    env.env.set(name, value)!;
+    return value;
+  }
+  lookup(name: string){
+    return this.resolve(name)!.env.get(name);
+  }
+  has(name: string):boolean{
+    if(this.env.has(name)){
+      return true;
     }
-    return this.env.has(name) ? true : this.parent?.has(name, depth - 1);
-  }
-  remove(name:string){
-    if (this.has(name)){
-      this.env.delete(name);
-      return;
+    if (!this.parent){
+      return false;
     }
-    this.parent?.remove(name);
+    return this.parent.has(name);
   }
-  
-  public get globalEnv() : Env {
-    let env:Env = this;
-    while (env.parent){
-      env = env.parent;
+  resolve(name: string):Env{
+    if (this.env.has(name)){
+      return this;
     }
-    return env;
+    if (!this.parent){
+      throw new Error(`Cannot resolve ${name}`);
+    }
+    return this.parent.resolve(name);
   }
-  
 }
