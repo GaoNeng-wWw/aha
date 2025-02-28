@@ -15,6 +15,9 @@ import { FunctionDeclStmt } from "@/ast/function-declaration-stmt";
 import { IfStmt } from "@/ast/if-stmt";
 import { VarDeclStmt } from "@/ast/variable-declaration-stmt";
 import { PrefixExpr } from "@/ast/prefix-expr";
+import { exec } from "child_process";
+import { ForStatement } from "@/ast/for-stmt";
+import { BreakStmt } from "@/ast/break-stmt";
 
 describe('Parser', ()=>{
   const tokenTobeDefined = (tokens: Token[]) => expect(tokens.length).gt(1);
@@ -283,4 +286,16 @@ describe('Parser', ()=>{
     expect(varDecl.id).toBe('x');
     expect(varDecl.value).toBeInstanceOf(NullLiteral);
   });
+  it('parse break statement', ()=>{
+    const lexer = createLexer(rules, `
+      for (let x<-1;x<=100;x<-x+1){
+        break;
+      }
+    `);
+    const tokens = lexer.run();
+    expect(tokens.some((token) => token.kind ===TokenKind.BREAK)).toBeTruthy()
+    const parser = createParser(tokens);
+    parser.run();
+    expect((parser.root?.body[0] as ForStatement).body[0]).instanceof(BreakStmt)
+  })
 })

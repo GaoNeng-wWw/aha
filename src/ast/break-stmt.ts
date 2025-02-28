@@ -1,13 +1,15 @@
 import { BREAK } from "@/constant";
 import { Env } from "./env";
-import { AstStmt } from "./node";
+import { AstNode, AstStmt, NullLiteral } from "./node";
+import { StringLiteral } from "./literal-expression";
 
 export class BreakStmt extends AstStmt {
   public name = 'BreakStatement';
   constructor(){
     super();
   }
-  eval(env: Env): unknown {
-    return ;
+  eval(env: Env): AstNode {
+    env.assign(BREAK, new StringLiteral(BREAK))
+    return new NullLiteral();
   }
 }

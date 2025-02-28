@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { AstNode } from "@/ast/node";
+import { AstNode, NullLiteral } from "@/ast/node";
 import { Env } from "@/ast/env";
-import { NullLiteral } from "../literal-expression";
 
 class MockNode implements AstNode {
   public name: string = 'MockNode';
