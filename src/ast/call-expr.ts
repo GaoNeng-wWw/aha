@@ -5,6 +5,7 @@ import { Identifier } from "./literal-expression";
 import { FunctionDeclStmt } from "./function-declaration-stmt";
 import { FunctionExpr } from "./function-expr";
 import { RETURN } from "@/constant";
+import { ComputedExpr } from "./computed-expr";
 
 export class CallExpr extends AstExpr {
   public name = 'Call Expression'
@@ -23,8 +24,12 @@ export class CallExpr extends AstExpr {
     if (is(this.method, FunctionDeclStmt)) {
       maybeFnName= this.method.fnName;
     }
+    let maybeFn = null;
+    if (is(this.method, ComputedExpr)) {
+      maybeFn = this.method.eval(env);
+    }
     const fnName = maybeFnName;
-    const fn = scope.lookup(fnName);
+    const fn = !is(maybeFn, FunctionExpr) ? scope.lookup(fnName) : maybeFn;
     if (!is(fn, FunctionDeclStmt) && !is(fn,FunctionExpr)){
       throw new Error(`Except function but found ${fn.name}`);
     }

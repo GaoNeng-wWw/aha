@@ -8,8 +8,9 @@ export const except = (val: unknown, clazz: Clazz<any>, errMessage?:string) => {
 export const exceptMany = (val: unknown, clazz: Clazz<any>[], errMessage?: string) => {
   for (const clzz of clazz) {
     if (val instanceof clzz){
-      break;
+      return ;
     }
-    throw new Error(errMessage ?? `Except ${clzz.name} but found ${val}`);
   }
+  const clzzNames = clazz.map(clzz => clzz.name).join(' or ');
+  throw new Error(errMessage ?? `Except ${clzzNames} but found ${typeof val}`);
 }

@@ -1,6 +1,6 @@
 import { RETURN } from "@/constant";
 import { Env } from "./env";
-import { AstNode, AstStmt } from "./node";
+import { AstNode, AstStmt, NullLiteral } from "./node";
 
 export class BlockStmt extends AstStmt {
   public name = 'Block Statement';
@@ -13,6 +13,6 @@ export class BlockStmt extends AstStmt {
     for (const body of this.body){
       body.eval(env);
     }
-    return;
+    return new NullLiteral();
   }
 }

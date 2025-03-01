@@ -253,7 +253,7 @@ export class Parser {
   }
   parseReturn(){
     this.expect(TokenKind.RETURN);
-    const returnValue = this.parseExprStmt();
+    const returnValue = this.parseStmt();
     return new ReturnStatement(returnValue);
   }
   parserBreak(){
