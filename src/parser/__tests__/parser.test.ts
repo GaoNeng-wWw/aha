@@ -228,7 +228,12 @@ describe('Parser', ()=>{
     expect((binaryExpr.r as NumberLiteral).val).toBe(3);
   });
   it('parse closure', ()=>{
-    const lexer = createLexer(rules, `let x <- fn(){ let y <- 1; return fn(){return y;};};`)
+    const lexer = createLexer(rules, `
+      let x <- fn(){
+        let f <- fn(){};
+        return f;
+      };
+    `)
     const tokens = lexer.run();
     tokenTobeDefined(tokens);
     const parser = createParser(tokens)
