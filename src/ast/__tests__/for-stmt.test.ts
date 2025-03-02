@@ -80,4 +80,21 @@ describe('For Statement',()=>{
   program.eval(env)
   expect(unwrap(env.lookup('x'))).toBe(50)
   })
+  it('Continue', ()=>{
+    const program = createProgram(`
+      let i <- 0;
+      fn f(){
+        for (let x <- 0; x <= 2; x <- x+1){
+          if (x > 0) {
+            continue;
+          }
+          i <- x;
+        }
+      }
+      f();
+    `)
+    program.eval(env);
+    expect(env.has('i')).toBeTruthy();
+    expect(unwrap(env.lookup('i'))).toBe(0);
+  })
 })

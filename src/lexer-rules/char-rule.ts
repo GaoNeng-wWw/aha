@@ -45,7 +45,8 @@ const charTokens:[RegExp, TokenKind,string][] = [
   [/^while/, TokenKind.WHILE, 'while'],
   [/^return/, TokenKind.RETURN, 'return'],
   [/^null/, TokenKind.NULL, 'null'],
-  [/^break/, TokenKind.BREAK, 'break']
+  [/^break/, TokenKind.BREAK, 'break'],
+  [/^continue/, TokenKind.CONTINUE, 'continue']
 ];
 
 export const charRules:LexerRule[] = charTokens.map(

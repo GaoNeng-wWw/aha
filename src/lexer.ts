@@ -53,7 +53,8 @@ export enum TokenKind {
   WHILE,
   RETURN,
   NULL,
-  BREAK
+  BREAK,
+  CONTINUE,
 }
 
 

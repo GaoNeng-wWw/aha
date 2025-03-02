@@ -18,6 +18,7 @@ import { PrefixExpr } from "@/ast/prefix-expr";
 import { exec } from "child_process";
 import { ForStatement } from "@/ast/for-stmt";
 import { BreakStmt } from "@/ast/break-stmt";
+import { ContinueStmt } from "@/ast/continue-stmt";
 
 describe('Parser', ()=>{
   const tokenTobeDefined = (tokens: Token[]) => expect(tokens.length).gt(1);
@@ -302,5 +303,17 @@ describe('Parser', ()=>{
     const parser = createParser(tokens);
     parser.run();
     expect((parser.root?.body[0] as ForStatement).body[0]).instanceof(BreakStmt)
+  })
+  it('parse continue statement', ()=>{
+    const lexer = createLexer(rules, `
+      for (let x<-1;x<=100;x<-x+1){
+        continue;
+      }
+    `);
+    const tokens = lexer.run();
+    expect(tokens.some((token) => token.kind ===TokenKind.CONTINUE)).toBeTruthy()
+    const parser = createParser(tokens);
+    parser.run();
+    expect((parser.root?.body[0] as ForStatement).body[0]).instanceof(ContinueStmt)
   })
 })

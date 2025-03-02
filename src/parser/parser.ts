@@ -19,6 +19,7 @@ import { ReturnStatement } from "@/ast/return-statement";
 import { ForStatement } from "@/ast/for-stmt";
 import { ObjectLiteral, Property } from "@/ast/object-literal";
 import { BreakStmt } from "@/ast/break-stmt";
+import { ContinueStmt } from "@/ast/continue-stmt";
 
 export type NudParser = () => AstExpr;
 export type LedParser = (left: AstExpr, bp: BP) => AstExpr;
@@ -262,6 +263,12 @@ export class Parser {
     this.expect(TokenKind.SEMI);
     return node;
   }
+  parseContinue(){
+    const node = new ContinueStmt();
+    this.next();
+    this.expect(TokenKind.SEMI);
+    return node;
+  }
   parseForStatement(){
     this.next();
     this.expect(TokenKind.OPEN_PAREN);
@@ -403,5 +410,6 @@ export class Parser {
     this.stmt(TokenKind.RETURN, this.parseReturn);
     this.stmt(TokenKind.FOR, this.parseForStatement);
     this.stmt(TokenKind.BREAK, this.parserBreak)
+    this.stmt(TokenKind.CONTINUE, this.parseContinue);
   }
 }

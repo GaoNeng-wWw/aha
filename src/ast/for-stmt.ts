@@ -33,6 +33,10 @@ export class ForStatement extends AstStmt {
         if (scope.has(RETURN) && scope.lookup(RETURN)){
           return scope.lookup(RETURN);
         }
+        if (scope.has(CONTINUE) && scope.lookup(CONTINUE)){
+          scope.remove(CONTINUE);
+          break;
+        }
         if (scope.has(BREAK) && scope.lookup(BREAK)){
           scope.remove(BREAK);
           return new NullLiteral();
