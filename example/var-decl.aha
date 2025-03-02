@@ -1,0 +1,8 @@
+let x <- 1;
+let obj <- {
+  foo: "baz"
+};
+let arr <- [2,3,4];
+show(x);
+show(obj.foo);
+show(arr[0]);

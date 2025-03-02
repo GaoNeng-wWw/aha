@@ -1,6 +1,14 @@
 # aha.ts
 
-aha.ts is tiny language (base on ast evaluator)
+aha.ts is tiny language (base on Tree traversal interpreter)
+
+## Front
+
+Used Regexp to split token, and used Pratt Parseing
+
+## Backend (aka. Runtime)
+
+Used Tree traversal interpreter (But there is no room for optimization)
 
 ## Feature
 
@@ -9,7 +17,7 @@ aha.ts is tiny language (base on ast evaluator)
 3. For loop
 4. function definition
 5. function call
-   1. Self recursion
+   -  Self recursion
 6. Object
 7. Array
 
@@ -71,4 +79,6 @@ let arr <- [1,2,3];
 let x <- arr[0]; // 1
 ```
 
+## Example
 
+[example](./example/README.md)

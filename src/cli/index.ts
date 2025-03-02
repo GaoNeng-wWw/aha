@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from "node:fs";
 import { repl } from "./repl";
-import { createProgram } from "@/utils/create";
+import { createProgram } from "@/program";
 
 (function (){
   const argv = process.argv;
