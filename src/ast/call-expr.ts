@@ -6,6 +6,7 @@ import { FunctionDeclStmt } from "./function-declaration-stmt";
 import { FunctionExpr } from "./function-expr";
 import { RETURN } from "@/constant";
 import { ComputedExpr } from "./computed-expr";
+import { MemberExpr } from "./member-expr";
 
 export class CallExpr extends AstExpr {
   public name = 'Call Expression'
@@ -26,6 +27,9 @@ export class CallExpr extends AstExpr {
     }
     let maybeFn = null;
     if (is(this.method, ComputedExpr)) {
+      maybeFn = this.method.eval(env);
+    }
+    if (is(this.method, MemberExpr)) {
       maybeFn = this.method.eval(env);
     }
     const fnName = maybeFnName;

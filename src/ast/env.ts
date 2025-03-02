@@ -25,6 +25,9 @@ export class Env {
   remove(name: string) {
     return this.resolve(name).env.delete(name)
   }
+  currentHas(name: string): boolean{
+    return this.env.has(name);
+  }
   has(name: string):boolean{
     if(this.env.has(name)){
       return true;

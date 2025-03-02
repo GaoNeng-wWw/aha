@@ -14,7 +14,7 @@ export class VarDeclStmt extends AstStmt {
   };
   eval(env: Env): AstNode {
     const value = is(this.value, Literal) ? this.value : this.value.eval(env);
-    if (env.has(this.id)){
+    if (env.currentHas(this.id)){
       throw new Error(`Variable ${this.id} is already defined`)
     }
     env.define(this.id, value)
