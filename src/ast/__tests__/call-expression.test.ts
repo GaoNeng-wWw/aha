@@ -1,10 +1,11 @@
 import { createProgram } from "@/utils/create";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Env } from "../env";
 import { RETURN } from "@/constant";
 import { unwrap } from "@/utils";
 import { NumberLiteral } from "../literal-expression";
 import { NullLiteral } from "../node";
+import builtIn from "../built-in";
 
 describe('Call Expression', ()=>{
   let env = new Env();
@@ -166,6 +167,32 @@ describe('Call Expression', ()=>{
       program.eval(env)
       expect(unwrap(env.lookup('x'))).toBe(fib(15))
     })
-    
+  })
+  it('Bulit In Call', ()=>{
+    const program = createProgram(
+      `
+      show("hello world");
+      fn f(){
+        return 1;
+      }
+      let x <- 1;
+      let y <- x;
+      show(y);
+      show(f());
+      show(f);
+      `
+    )
+    const f = vi.fn();
+    vi.spyOn(builtIn, 'show').mockImplementation(f);
+    program.eval(env);
+    expect(f).toHaveBeenCalled();
+  })
+  it('Fast Pow', ()=>{
+    const program = createProgram(`
+      let x <- pow(2,8);
+    `)
+    program.eval(env);
+    expect(env.lookup('x')).instanceOf(NumberLiteral);
+    expect(unwrap(env.lookup('x'))).toBe(2**8)
   })
 })

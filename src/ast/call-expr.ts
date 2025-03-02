@@ -1,12 +1,13 @@
 import { is } from "@/utils";
 import { Env } from "./env";
-import { AstExpr, AstNode, NullLiteral} from "./node";
+import { AstExpr, AstNode, AstStmt, NullLiteral} from "./node";
 import { Identifier } from "./literal-expression";
 import { FunctionDeclStmt } from "./function-declaration-stmt";
 import { FunctionExpr } from "./function-expr";
 import { RETURN } from "@/constant";
 import { ComputedExpr } from "./computed-expr";
 import { MemberExpr } from "./member-expr";
+import BUILT_IN from '@/ast/built-in';
 
 export class CallExpr extends AstExpr {
   public name = 'Call Expression'
@@ -33,6 +34,14 @@ export class CallExpr extends AstExpr {
       maybeFn = this.method.eval(env);
     }
     const fnName = maybeFnName;
+    if (fnName in BUILT_IN){
+      const build_in_functions = BUILT_IN as Record<string, any>;
+      const args = this.argList.map(arg => arg.eval(scope));
+      return build_in_functions[fnName](
+        env,
+        ...args
+      );
+    }
     const fn = !is(maybeFn, FunctionExpr) ? scope.lookup(fnName) : maybeFn;
     if (!is(fn, FunctionDeclStmt) && !is(fn,FunctionExpr)){
       throw new Error(`Except function but found ${fn.name}`);
