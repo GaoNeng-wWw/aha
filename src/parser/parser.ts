@@ -1,5 +1,5 @@
 import { MemberExpr } from "@/ast/member-expr";
-import { AstAssignment } from "../ast/assignment";
+import { Assignment } from "../ast/assignment";
 import { BinaryExpr } from "../ast/bianry-expr";
 import { BlockStmt } from "../ast/block-stmt";
 import { CallExpr } from "../ast/call-expr";
@@ -7,8 +7,8 @@ import { ExprStmt } from "../ast/expression-stmt";
 import { FunctionDeclStmt } from "../ast/function-declaration-stmt";
 import { FunctionExpr } from "../ast/function-expr";
 import { IfStmt } from "../ast/if-stmt";
-import { AstExpr, AstStmt } from "../ast/node";
-import {  ArrayLiteral, AstBooleanLiteral, AstNumberLiteral, AstStringLiteral, AstSymbolExpr, NullLiteral, } from "../ast/literal-expression";
+import { AstExpr, AstStmt, NullLiteral } from "../ast/node";
+import {  ArrayLiteral, BooleanLiteral, NumberLiteral, StringLiteral, Identifier, } from "../ast/literal-expression";
 import { ParameterStmt } from "../ast/parameter";
 import { PrefixExpr } from "../ast/prefix-expr";
 import { VarDeclStmt } from "../ast/variable-declaration-stmt";
@@ -18,6 +18,8 @@ import { ComputedExpr } from "@/ast/computed-expr";
 import { ReturnStatement } from "@/ast/return-statement";
 import { ForStatement } from "@/ast/for-stmt";
 import { ObjectLiteral, Property } from "@/ast/object-literal";
+import { BreakStmt } from "@/ast/break-stmt";
+import { ContinueStmt } from "@/ast/continue-stmt";
 
 export type NudParser = () => AstExpr;
 export type LedParser = (left: AstExpr, bp: BP) => AstExpr;
@@ -88,7 +90,7 @@ export class Parser {
   parseAssignment(left: AstExpr, bp:BP){
     this.next();
     const rhs = this.parseExpr(bp);
-    return new AstAssignment(left, rhs);
+    return new Assignment(left, rhs);
   }
   parseBinaryExpr(l: AstExpr, bp: BP){
     const operator = this.next();
@@ -98,20 +100,21 @@ export class Parser {
   parsePrimaryExpr(){
     switch (this.currentTokenKind()){
       case TokenKind.NUMBER: {
-        return new AstNumberLiteral(Number.parseFloat(this.next().value));
+        return new NumberLiteral(Number.parseFloat(this.next().value));
       }
       case TokenKind.STRING: {
-        return new AstStringLiteral(this.next().value);
+        return new StringLiteral(this.next().value);
       }
       case TokenKind.IDENTIFIER: {
-        return new AstSymbolExpr(this.next().value);
+        return new Identifier(this.next().value);
       }
       case TokenKind.BOOLEAN: {
-        return new AstBooleanLiteral(this.next().value);
+        return new BooleanLiteral(this.next().value);
       }
       case TokenKind.NULL: {
         this.next();
         return new NullLiteral();
+        // return new NullLiteral();
       }
       default: {
         throw new Error(`Cannot create primary expr from ${TokenKind[this.currentTokenKind()]}`)
@@ -251,8 +254,20 @@ export class Parser {
   }
   parseReturn(){
     this.expect(TokenKind.RETURN);
-    const returnValue = this.parseExprStmt();
+    const returnValue = this.parseStmt();
     return new ReturnStatement(returnValue);
+  }
+  parserBreak(){
+    const node = new BreakStmt();
+    this.next();
+    this.expect(TokenKind.SEMI);
+    return node;
+  }
+  parseContinue(){
+    const node = new ContinueStmt();
+    this.next();
+    this.expect(TokenKind.SEMI);
+    return node;
   }
   parseForStatement(){
     this.next();
@@ -394,5 +409,7 @@ export class Parser {
     this.stmt(TokenKind.IF, this.parseIfStmt);
     this.stmt(TokenKind.RETURN, this.parseReturn);
     this.stmt(TokenKind.FOR, this.parseForStatement);
+    this.stmt(TokenKind.BREAK, this.parserBreak)
+    this.stmt(TokenKind.CONTINUE, this.parseContinue);
   }
 }

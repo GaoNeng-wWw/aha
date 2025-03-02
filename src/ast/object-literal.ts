@@ -1,19 +1,22 @@
+import { is } from "@/utils";
 import { Env } from "./env";
-import { AstExpr } from "./node";
+import { Identifier } from "./literal-expression";
+import { AstExpr, AstNode } from "./node";
 
 export class ObjectLiteral extends AstExpr {
+  public m: Map<string|number, Property>
   public name = 'ObjectLiteral';
   constructor(
-    public properties: Property[]
+    private properties: Property[]
   ){
     super();
-    const m = new Map();
-    for(const property of properties) {
-      m.set(property.id, property);
+    this.m = new Map();
+    for (const prop of properties){
+      this.m.set(prop.id, prop);
     }
-    this.properties = [...m.values()]
   }
-  eval(env: Env): unknown {
+  eval(env: Env) {
+    this.properties.forEach(prop => prop.eval(env))
     return this;
   }
 }
@@ -22,11 +25,12 @@ export class Property extends AstExpr {
   public name = 'PropertyExpression'
   constructor(
     public id:string,
-    public value: AstExpr
+    public value: AstNode
   ){
     super();
   }
   eval(env: Env) {
-    return this.value.eval(env);
+    this.value = is(this.value, Identifier) ? this.value.eval(env) : this.value;
+    return this.value;
   }
 }

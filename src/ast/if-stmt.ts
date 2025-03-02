@@ -1,7 +1,7 @@
-import { is } from "@/utils";
+import { except, is, unwrap } from "@/utils";
 import { Env } from "./env";
-import { AstExpr, AstStmt } from "./node";
-import { AstBooleanLiteral } from "./literal-expression";
+import { AstExpr, AstNode, AstStmt, NullLiteral } from "./node";
+import { BooleanLiteral, Literal } from "./literal-expression";
 
 export class IfStmt extends AstStmt {
   public name = 'If Statement'
@@ -12,11 +12,12 @@ export class IfStmt extends AstStmt {
   ){
     super();
   }
-  eval(env: Env): unknown {
-    const ifEnv = new Env(env);
-    if (this.condition.eval(ifEnv)){
-      return this.body.eval(ifEnv);
+  eval(env: Env): AstNode {
+    const status = this.condition.eval(env);
+    except(status, Literal);
+    if (unwrap(status)){
+      return this.body.eval(env);
     }
-    return this.elseBody.eval(ifEnv);
+    return this.elseBody.eval(env);
   }
 }

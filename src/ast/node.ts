@@ -1,26 +1,29 @@
 import { Env } from "./env";
+export interface AstNode {
+  name: string,
+  eval(env:Env): unknown;
+}
 
-export class AstNode {
-  public name = '';
-  eval(env: Env):unknown{
-    return;
-  }
-}
-export class AstStmt extends AstNode {
+export class AstStmt implements AstNode {
   public name = 'Statement';
-  constructor(){
-    super();
-  }
-  eval(env: Env): unknown {
-    return;
+  constructor(){}
+  eval(env: Env): AstNode{
+    return new NullLiteral();
   }
 }
-export class AstExpr extends AstNode {
+export class AstExpr implements AstNode {
   public name = 'Expression';
-  constructor(){
-    super();
+  constructor(){}
+  eval(env: Env): AstNode{
+    return new NullLiteral();
   }
-  eval(env: Env): unknown{
-    return;
+}
+
+export class NullLiteral{
+  public name = 'Null Literal';
+  public val = 'null'
+  constructor(){}
+  eval(env:Env) {
+    return this;
   }
 }

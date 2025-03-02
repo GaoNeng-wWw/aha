@@ -1,10 +1,13 @@
 import { is } from "@/utils";
 import { Env } from "./env";
-import { AstExpr} from "./node";
-import { AstLiteral, AstSymbolExpr, NullLiteral } from "./literal-expression";
+import { AstExpr, AstNode, AstStmt, NullLiteral} from "./node";
+import { Identifier } from "./literal-expression";
 import { FunctionDeclStmt } from "./function-declaration-stmt";
 import { FunctionExpr } from "./function-expr";
-import { BREAK, RETURN } from "@/constant";
+import { RETURN } from "@/constant";
+import { ComputedExpr } from "./computed-expr";
+import { MemberExpr } from "./member-expr";
+import BUILT_IN from '@/ast/built-in';
 
 export class CallExpr extends AstExpr {
   public name = 'Call Expression'
@@ -14,36 +17,44 @@ export class CallExpr extends AstExpr {
   ){
     super();
   }
-  eval(env:Env): AstExpr {
-    if (!is(this.method, AstSymbolExpr)){
-      throw new Error(`Except identifier, but found ${this.method.name}`)
+  eval(env:Env): AstNode {
+    const scope = new Env(env);
+    let maybeFnName='';
+    if(is(this.method, Identifier)) {
+      maybeFnName = this.method.val;
     }
-    const fnName = this.method.val;
-    const fn = env.lookup(fnName,-1);
-    if (!is(fn, FunctionDeclStmt) && !is(fn, FunctionExpr)){
-      throw new Error(`${fnName} is not function`);
+    if (is(this.method, FunctionDeclStmt)) {
+      maybeFnName= this.method.fnName;
     }
-    const fnEnv = new Env(env);
-    if (this.argList.length > fn.params.length) {
-      throw new Error(`Too many arguments, function requires ${fn.params.length} arguments, but received ${this.argList.length}`);
+    let maybeFn = null;
+    if (is(this.method, ComputedExpr)) {
+      maybeFn = this.method.eval(env);
     }
-    if (this.argList.length < fn.params.length) {
-      throw new Error(`Too few arguments, function requires ${fn.params.length} arguments, but received ${this.argList.length}`);
+    if (is(this.method, MemberExpr)) {
+      maybeFn = this.method.eval(env);
     }
-    const args = this.argList.map((arg) => is(arg, AstLiteral) ? arg : arg.eval(fnEnv));
+    const fnName = maybeFnName;
+    if (fnName in BUILT_IN){
+      const build_in_functions = BUILT_IN as Record<string, any>;
+      const args = this.argList.map(arg => arg.eval(scope));
+      return build_in_functions[fnName](
+        env,
+        ...args
+      );
+    }
+    const fn = !is(maybeFn, FunctionExpr) ? scope.lookup(fnName) : maybeFn;
+    if (!is(fn, FunctionDeclStmt) && !is(fn,FunctionExpr)){
+      throw new Error(`Except function but found ${fn.name}`);
+    }
     for (let i=0;i<fn.params.length;i++){
-      const name = fn.params[i].paramName;
-      fnEnv.insert(name, args[i]);
+      const {paramName} = fn.params[i];
+      scope.define(paramName, this.argList[i].eval(scope));
     }
-    const body = fn.body;
-
-    for (const stmt of body) {
-      stmt.eval(fnEnv);
-      if (fnEnv.has(RETURN) || fnEnv.globalEnv.has(RETURN)){
-        const val = fnEnv.globalEnv.lookup(RETURN) as AstExpr | null;
-        fnEnv.remove(RETURN);
-        fnEnv.globalEnv.remove(RETURN);
-        return val ? val : new NullLiteral();
+    env.define(RETURN, null);
+    for (const body of fn.body){
+      body.eval(scope)
+      if (scope.lookup(RETURN) !== null){
+        return scope.lookup(RETURN);
       }
     }
     return new NullLiteral();

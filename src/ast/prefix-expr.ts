@@ -1,8 +1,8 @@
 import { is } from "@/utils";
 import { getTokenName, Token, TokenKind } from "../lexer";
 import { Env } from "./env";
-import { AstExpr, AstNode } from "./node";
-import { AstBooleanLiteral, AstLiteral, AstNumberLiteral, AstSymbolExpr } from "./literal-expression";
+import { AstExpr, AstNode, NullLiteral } from "./node";
+import { BooleanLiteral, Literal, NumberLiteral, Identifier } from "./literal-expression";
 
 export class PrefixExpr extends AstExpr {
   public name = 'Prefix Expression'
@@ -14,26 +14,22 @@ export class PrefixExpr extends AstExpr {
   }
   eval(env: Env): AstNode {
     switch (this.operator.kind) {
-      case TokenKind.DASH: {
-        if (is(this.rhs, AstNumberLiteral)){
-          return new AstNumberLiteral(-this.rhs.eval())
+      case TokenKind.NOT:{
+        const rhsValue = this.rhs.eval(env);
+        if (!is(rhsValue, BooleanLiteral)){
+          throw new Error(`Except boolean but found ${rhsValue.name}`);
         }
-        const val = this.rhs.eval(env);
-        if (is(val, AstNumberLiteral)) {
-          return new AstNumberLiteral(-val);
-        }
-        throw new Error(`- only be used before numbers`)
+        return new BooleanLiteral(`${!rhsValue.val}`);
       }
-      case TokenKind.NOT:
-        if (!is(this.rhs, AstNode)){
-          return new AstBooleanLiteral(`${!this.rhs}`)
+      case TokenKind.DASH:{
+        const rhsValue = this.rhs.eval(env);
+        if (!is(rhsValue, NumberLiteral)){
+          throw new Error(`symbol '-' only used before number`)
         }
-        if (is(this.rhs, AstBooleanLiteral)){
-          return new AstBooleanLiteral(`${!this.rhs.eval()}`);
-        }
-        return new AstBooleanLiteral(`${!this.rhs.eval(env)}`);
+        return new NumberLiteral(-rhsValue.val);
+      }
       default:
-        throw new Error(`${getTokenName(this.operator.kind)} is not prefix `)
+        throw new Error(`Unknown prefix expression ${getTokenName(this.operator.kind)}`)
     }
   }
 }

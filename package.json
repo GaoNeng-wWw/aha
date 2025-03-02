@@ -6,10 +6,13 @@
 	},
 	"devDependencies": {
 		"@vitest/coverage-v8": "2.1.8",
+		"esno": "^4.8.0",
 		"vitest": "^2.1.8"
 	},
 	"scripts": {
 		"test": "vitest",
-		"test:cov": "vitest --coverage"
+		"test:cov": "vitest --coverage",
+		"repl": "esno src/cli/repl.ts",
+    "aha": "esno src/cli/index.ts"
 	}
 }

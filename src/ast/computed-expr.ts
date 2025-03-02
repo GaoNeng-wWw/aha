@@ -1,78 +1,51 @@
-  import { is } from "@/utils";
-  import { Env } from "./env";
-  import { AstExpr } from "./node";
-  import { AstLiteral, AstNumberLiteral, AstStringLiteral, NullLiteral, ArrayLiteral, AstSymbolExpr } from "./literal-expression";
-  import { ObjectLiteral, Property } from "./object-literal";
+import { exceptMany, is, isMany, unwrap } from "@/utils";
+import { Env } from "./env";
+import { AstExpr, AstNode, NullLiteral } from "./node";
+import { ObjectLiteral } from "./object-literal";
+import { ArrayLiteral, Identifier, Literal } from "./literal-expression";
 
 
-  export class ComputedExpr extends AstExpr {
-    public name = 'Computed Expression';
-    constructor(
-      public member: AstExpr,
-      public property: AstExpr
-    ){
-      super();
-    }
-    private _eval(env:Env, object: AstExpr, property: AstExpr): AstExpr{
-      let value = object;
-      let key = property;
-      if (is(value, AstSymbolExpr)){
-        const maybeObjectOrArray = value.eval(env) as ObjectLiteral | ArrayLiteral;
-        if (!is(maybeObjectOrArray, ObjectLiteral) && !Array.isArray(maybeObjectOrArray)){
-          return new NullLiteral()
-        }
-        if (is(maybeObjectOrArray, ObjectLiteral)) {
-          value = maybeObjectOrArray;
-        }
-        if (Array.isArray(maybeObjectOrArray)){
-          value = new ArrayLiteral(maybeObjectOrArray);
-        }
-      }
-      if (is(value, AstLiteral)){
-        return value;
-      }
-      if (is(value, Property)){
-        return value.value;
-      }
-      if (is(value, ObjectLiteral)) {
-        const id = key.eval(env);
-        if (!is(key, AstStringLiteral)){
-          throw new Error(`Key except string type but find ${key.name}`);
-        }
-        let flag = true;
-        for (const prop of value.properties) {
-          if (prop.id === id){
-            value = prop.value;
-            flag = false;
-            break;
-          }
-        }
-        if (flag){
-          return new NullLiteral()
-        }
-        return value;
-      }
-      if (is(value, ArrayLiteral)) {
-        const idx = key.eval(env);
-        if (is(idx, AstNumberLiteral)){
-          value = value.contents[idx.eval()] ?? new NullLiteral();
-          return value;
-        }
-        if (typeof idx === 'number') {
-          value = value.contents[idx] ?? new NullLiteral();
-          return value;
-        }
-        if (typeof idx !== 'number'){
-          throw new Error(`Index type except number but found ${typeof idx}`);
-        }
-      }
-      if (is(value, ComputedExpr)) {
-        value = this._eval(env, value.eval(env), key);
-        return value
-      }
-      return new NullLiteral()
-    }
-    eval(env:Env): AstExpr {
-      return this._eval(env, this.member, this.property); 
-    }
+
+export class ComputedExpr extends AstExpr {
+  public name = 'Computed Expression';
+  constructor(
+    public member: AstExpr,
+    public property: AstExpr
+  ) {
+    super();
   }
+  eval(env: Env): AstNode{
+    const literal = this.member.eval(env);
+    if (!is(literal, ObjectLiteral) && !is(literal, ArrayLiteral)){
+      throw new Error(`Except Object or array but found ${literal.name}`);
+    }
+    const maybeValidProperty = isMany(this.property, [Identifier, Literal]) ? this.property : this.property.eval(env);
+    exceptMany(maybeValidProperty, [Identifier, Literal]);
+    const property = maybeValidProperty as Identifier | Literal;
+    let key:string | number  = '';
+    if (is(property, Identifier)){
+      const idRef = property.eval(env);
+      if (!is(idRef, Literal)){
+        throw new Error(`Except literal but found ${idRef.name}`);
+      }
+      key = unwrap<string | number>(idRef);
+    }
+    if (is(property, Literal)) {
+      key = unwrap<string | number>(property);
+    }
+    if (is(literal, ObjectLiteral)){
+      return literal.m.get(key)?.eval(env) ?? new NullLiteral();
+    }
+    if (is(literal, ArrayLiteral)){
+      if (typeof key !== 'number'){
+        throw new Error(`Array Index except number but found ${key}`)
+      }
+      const value = literal.contents[key];
+      if (!value){
+        return new NullLiteral();
+      }
+      return (is(value,Literal) ? value : value.eval(env))
+    }
+    return new NullLiteral();
+  }
+}

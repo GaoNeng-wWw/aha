@@ -10,7 +10,7 @@ export class FunctionExpr extends AstExpr {
   ){
     super();
   }
-  eval(env: Env): unknown {
+  eval(env: Env): FunctionExpr {
     return this;
   }
 }

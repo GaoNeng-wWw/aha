@@ -1,7 +1,7 @@
 import { is } from "@/utils";
 import { Env } from "./env";
-import { AstLiteral } from "./literal-expression";
-import { AstExpr, AstStmt } from "./node";
+import { Literal } from "./literal-expression";
+import { AstExpr, AstNode, AstStmt } from "./node";
 
 export class VarDeclStmt extends AstStmt {
   public name = 'Variable Declaration Statement';
@@ -12,8 +12,12 @@ export class VarDeclStmt extends AstStmt {
   ){
     super();
   };
-  eval(env: Env): AstExpr {
-    env.insert(this.id, is(this.value, AstLiteral) ? this.value : this.value.eval(env));
-    return this.value;
+  eval(env: Env): AstNode {
+    const value = is(this.value, Literal) ? this.value : this.value.eval(env);
+    if (env.currentHas(this.id)){
+      throw new Error(`Variable ${this.id} is already defined`)
+    }
+    env.define(this.id, value)
+    return value;
   }
 }
