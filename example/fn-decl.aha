@@ -1,0 +1,9 @@
+let f <- fn(){
+  return 42;
+};
+
+fn f2(){
+  return 42;
+}
+
+show(f() == f2());
