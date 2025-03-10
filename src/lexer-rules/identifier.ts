@@ -2,8 +2,9 @@ import { LexerRule, Token, TokenKind } from "../lexer";
 
 const builtinKeywordLookup: { [key: string]: TokenKind } = {
   'true': TokenKind.BOOLEAN,
-  'false':TokenKind.BOOLEAN,
-  'const': TokenKind.LET,
+  'false': TokenKind.BOOLEAN,
+  'let': TokenKind.LET,
+  'const': TokenKind.CONST,
   'fn': TokenKind.FUNCTION,
   'if': TokenKind.IF,
   'else': TokenKind.ELSE,
@@ -12,13 +13,13 @@ const builtinKeywordLookup: { [key: string]: TokenKind } = {
   'return': TokenKind.RETURN
 }
 
-export const identifierRule:LexerRule = [
+export const identifierRule: LexerRule = [
   /^[a-zA-Z_][a-zA-Z0-9_]*/,
-  ({lexer,match}) => {
+  ({ lexer, match }) => {
     const matchValue = match[0];
-    let token:Token<TokenKind>;
+    let token: Token;
     const lookupValue = matchValue in builtinKeywordLookup ? builtinKeywordLookup[matchValue] : null;
-    if (lookupValue){
+    if (lookupValue) {
       token = lexer.createToken(lookupValue, matchValue);
     } else {
       token = lexer.createToken(TokenKind.IDENTIFIER, match[0]);

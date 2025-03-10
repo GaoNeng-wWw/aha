@@ -8,11 +8,11 @@ import { FunctionDeclStmt } from "../ast/function-declaration-stmt";
 import { FunctionExpr } from "../ast/function-expr";
 import { IfStmt } from "../ast/if-stmt";
 import { AstExpr, AstStmt, NullLiteral } from "../ast/node";
-import {  ArrayLiteral, BooleanLiteral, NumberLiteral, StringLiteral, Identifier, } from "../ast/literal-expression";
+import { ArrayLiteral, BooleanLiteral, NumberLiteral, StringLiteral, Identifier, } from "../ast/literal-expression";
 import { ParameterStmt } from "../ast/parameter";
 import { PrefixExpr } from "../ast/prefix-expr";
 import { VarDeclStmt } from "../ast/variable-declaration-stmt";
-import { getTokenName,Token, TokenKind } from "../lexer";
+import { getTokenName, Token, TokenKind } from "../lexer";
 import { BP } from "./bp-lookup";
 import { ComputedExpr } from "@/ast/computed-expr";
 import { ReturnStatement } from "@/ast/return-statement";
@@ -30,24 +30,24 @@ export type StmtHandler = () => AstStmt;
 export type StmtLookuo = Map<TokenKind, StmtHandler>;
 
 export class Parser {
-  public bpTable:BPTable;
+  public bpTable: BPTable;
   public nudTable: NudTable;
   public ledTable: LedTable;
   public tokens: Token[];
   public cursor: number;
-  public stmtLookup:StmtLookuo = new Map();
+  public stmtLookup: StmtLookuo = new Map();
   public root: BlockStmt | null = null;
 
   constructor(
-    tokens: Token[]=[]
-  ){
+    tokens: Token[] = []
+  ) {
     this.bpTable = new Map();
     this.nudTable = new Map();
     this.ledTable = new Map();
     this.tokens = tokens;
     this.cursor = 0;
   }
-  run(){
+  run() {
     this.setupTokenLookup();
     const body = [];
     while (this.hasToken()) {
@@ -58,47 +58,47 @@ export class Parser {
     this.root = new BlockStmt(body);
     return this.root;
   }
-  getRoot(){
+  getRoot() {
     return this.root;
   }
-  dump(){
+  dump() {
     return JSON.stringify(this.root, null, 2);
   }
 
-  parseExpr(bp: BP){
+  parseExpr(bp: BP) {
     const tk = this.currentTokenKind();
     const nudParse = this.nudTable.get(tk)
-    if(!nudParse){
+    if (!nudParse) {
       throw new Error(`expcept for token ${TokenKind[tk]}`);
     }
     let left = nudParse.bind(this)();
-    while (this.bpTable.get(this.currentTokenKind()) && this.bpTable.get(this.currentTokenKind())! > bp){
+    while (this.bpTable.get(this.currentTokenKind()) && this.bpTable.get(this.currentTokenKind())! > bp) {
       const tk = this.currentTokenKind();
       const led = this.ledTable.get(tk);
-      if(!led){
+      if (!led) {
         throw new Error(`expcept for token ${TokenKind[tk]}`);
       }
       left = led.bind(this)(left, bp);
     }
     return left;
   }
-  parsePrefixExpr(){
+  parsePrefixExpr() {
     const operator = this.next();
     const expr = this.parseExpr(BP.UNARY);
     return new PrefixExpr(operator, expr);
   }
-  parseAssignment(left: AstExpr, bp:BP){
+  parseAssignment(left: AstExpr, bp: BP) {
     this.next();
     const rhs = this.parseExpr(bp);
     return new Assignment(left, rhs);
   }
-  parseBinaryExpr(l: AstExpr, bp: BP){
+  parseBinaryExpr(l: AstExpr, bp: BP) {
     const operator = this.next();
     const r = this.parseExpr(BP.DEFAULT_BP);
-    return new BinaryExpr(l,operator,r);
+    return new BinaryExpr(l, operator, r);
   }
-  parsePrimaryExpr(){
-    switch (this.currentTokenKind()){
+  parsePrimaryExpr() {
+    switch (this.currentTokenKind()) {
       case TokenKind.NUMBER: {
         return new NumberLiteral(Number.parseFloat(this.next().value));
       }
@@ -121,18 +121,18 @@ export class Parser {
       }
     }
   }
-  parseMember(lhs: AstExpr, bp: BP){
+  parseMember(lhs: AstExpr, bp: BP) {
     const isComputed = this.next().kind === TokenKind.OPEN_BRACKET;
-    if (!isComputed){
+    if (!isComputed) {
       return new MemberExpr(lhs, this.expect(TokenKind.IDENTIFIER).value);
     }
     const rhs = this.parseExpr(bp);
     this.expect(TokenKind.CLOSE_BRACKET);
     return new ComputedExpr(
-      lhs,rhs
+      lhs, rhs
     )
   }
-  parseGrouping(){
+  parseGrouping() {
     this.expect(TokenKind.OPEN_PAREN);
     const expr = this.parseExpr(BP.DEFAULT_BP);
     this.expect(TokenKind.CLOSE_PAREN);
@@ -140,12 +140,12 @@ export class Parser {
   }
   parseCall(
     lhs: AstExpr,
-  ){
+  ) {
     this.next();
     const args = [];
     while (
       this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_PAREN
-    ){
+    ) {
       args.push(
         this.parseExpr(BP.ASSIGNMENT)
       );
@@ -158,26 +158,26 @@ export class Parser {
     this.expect(TokenKind.CLOSE_PAREN);
     return new CallExpr(lhs, args)
   }
-  parseFnExpr(){
+  parseFnExpr() {
     this.expect(TokenKind.FUNCTION);
     const [params, body] = this.parseFnParamAndBody();
     return new FunctionExpr(params, body);
   }
 
-  parseStmt(){
+  parseStmt() {
     const f = this.stmtLookup.get(this.currentTokenKind());
-    if (!f){
+    if (!f) {
       return this.parseExprStmt();
     }
     return f.bind(this)();
   }
-  parseExprStmt(){
+  parseExprStmt() {
     const expr = this.parseExpr.bind(this)(BP.DEFAULT_BP);
-    
+
     this.expect(TokenKind.SEMI);
     return new ExprStmt(expr);
   }
-  parseBlock(){
+  parseBlock() {
     this.expect(TokenKind.OPEN_CURLY);
     const body = [];
     while (this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_CURLY) {
@@ -186,7 +186,8 @@ export class Parser {
     this.expect(TokenKind.CLOSE_CURLY);
     return new BlockStmt(body);
   }
-  parseVarDeclStmt(){
+  parseVarDeclStmt() {
+    const isConst = this.currentTokenKind() === TokenKind.CONST;
     const token = this.next().kind;
     const name = this.expect(
       TokenKind.IDENTIFIER,
@@ -202,27 +203,27 @@ export class Parser {
       value = new NullLiteral();
     }
     this.expect(TokenKind.SEMI);
-    return new VarDeclStmt(name.value, false, value);
+    return new VarDeclStmt(name.value, isConst, value);
   }
-  parseFnParamAndBody(): [ParameterStmt[], AstStmt[]]{
-    const params:ParameterStmt[] = [];
+  parseFnParamAndBody(): [ParameterStmt[], AstStmt[]] {
+    const params: ParameterStmt[] = [];
     this.expect(TokenKind.OPEN_PAREN);
     while (
       this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_PAREN
     ) {
-      if (this.peek().kind === TokenKind.CLOSE_PAREN){
+      if (this.peek().kind === TokenKind.CLOSE_PAREN) {
         this.expect(TokenKind.CLOSE_PAREN);
         break;
       }
       const paramName = this.expect(TokenKind.IDENTIFIER).value;
-      if (this.peek().kind !== TokenKind.CLOSE_PAREN){
+      if (this.peek().kind !== TokenKind.CLOSE_PAREN) {
         this.expect(TokenKind.COLON);
       }
       params.push(
         new ParameterStmt(paramName)
       )
       if (
-        !this.peek().isMany(TokenKind.CLOSE_PAREN,TokenKind.EOF)
+        !this.peek().isMany(TokenKind.CLOSE_PAREN, TokenKind.EOF)
       ) {
         this.expect(TokenKind.COMMA)
       }
@@ -231,20 +232,20 @@ export class Parser {
     const body = this.parseBlock().body;
     return [params, body];
   }
-  parseFnDecl(){
+  parseFnDecl() {
     this.next();
     const fnName = this.expect(TokenKind.IDENTIFIER).value;
     const [params, body] = this.parseFnParamAndBody();
     return new FunctionDeclStmt(params, fnName, body);
   }
-  parseIfStmt(): AstStmt{
+  parseIfStmt(): AstStmt {
     this.next();
     const condition = this.parseExpr(BP.ASSIGNMENT);
     const body = this.parseBlock();
-    let elseBody:AstStmt = new AstStmt();
+    let elseBody: AstStmt = new AstStmt();
     if (this.currentTokenKind() === TokenKind.ELSE) {
       this.next();
-      if(this.currentTokenKind() === TokenKind.IF) {
+      if (this.currentTokenKind() === TokenKind.IF) {
         elseBody = this.parseIfStmt();
       } else {
         elseBody = this.parseBlock();
@@ -252,24 +253,24 @@ export class Parser {
     }
     return new IfStmt(condition, body, elseBody);
   }
-  parseReturn(){
+  parseReturn() {
     this.expect(TokenKind.RETURN);
     const returnValue = this.parseStmt();
     return new ReturnStatement(returnValue);
   }
-  parserBreak(){
+  parserBreak() {
     const node = new BreakStmt();
     this.next();
     this.expect(TokenKind.SEMI);
     return node;
   }
-  parseContinue(){
+  parseContinue() {
     const node = new ContinueStmt();
     this.next();
     this.expect(TokenKind.SEMI);
     return node;
   }
-  parseForStatement(){
+  parseForStatement() {
     this.next();
     this.expect(TokenKind.OPEN_PAREN);
 
@@ -285,9 +286,9 @@ export class Parser {
     this.expect(TokenKind.CLOSE_PAREN);
     return new ForStatement(initialization, condition, incrementor, this.parseBlock().body);
   }
-  parseArrayLiteral(){
+  parseArrayLiteral() {
     this.expect(TokenKind.OPEN_BRACKET);
-    const contents:AstExpr[] = [];
+    const contents: AstExpr[] = [];
     while (
       this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_BRACKET
     ) {
@@ -299,72 +300,72 @@ export class Parser {
     this.expect(TokenKind.CLOSE_BRACKET);
     return new ArrayLiteral(contents);
   }
-  parseObjectLiteral(){
+  parseObjectLiteral() {
     this.expect(TokenKind.OPEN_CURLY);
-    const properties:Property[] = [];
+    const properties: Property[] = [];
     while (
       this.hasToken() && this.currentTokenKind() !== TokenKind.CLOSE_CURLY
     ) {
       const property = this.parseObjectProperty();
       properties.push(property);
-      if (!this.peek().isMany(TokenKind.EOF, TokenKind.CLOSE_CURLY)){
+      if (!this.peek().isMany(TokenKind.EOF, TokenKind.CLOSE_CURLY)) {
         this.expect(TokenKind.COMMA);
       }
     }
     this.expect(TokenKind.CLOSE_CURLY);
     return new ObjectLiteral(properties)
   }
-  parseObjectProperty(){
+  parseObjectProperty() {
     const id = this.expect(TokenKind.IDENTIFIER).value;
     this.expect(TokenKind.COLON)
     const value = this.parseExpr(BP.DEFAULT_BP);
     return new Property(id, value);
   }
 
-  public peek(){
+  public peek() {
     return this.tokens[this.cursor];
   }
-  public next(){
+  public next() {
     const token = this.tokens[this.cursor];
     this.cursor += 1;
     return token;
   }
-  public hasToken(){
+  public hasToken() {
     return this.cursor < this.tokens.length && this.tokens[this.cursor].kind !== TokenKind.EOF;
   }
-  public getTokens(){
+  public getTokens() {
     return this.tokens;
   }
-  public getCurrentBP(){
+  public getCurrentBP() {
     return this.bpTable.get(this.currentTokenKind());
   }
-  public currentTokenKind(){
+  public currentTokenKind() {
     const tk = this.peek();
     return tk.kind;
   }
-  public nud(kind: TokenKind, bp:BP, f: NudParser){
+  public nud(kind: TokenKind, bp: BP, f: NudParser) {
     this.bpTable.set(kind, BP.PRIMAR);
     this.nudTable.set(kind, f);
   }
-  public led(kind: TokenKind, bp:BP, f: LedParser){
+  public led(kind: TokenKind, bp: BP, f: LedParser) {
     this.bpTable.set(kind, bp);
-    this.ledTable.set(kind,f);
+    this.ledTable.set(kind, f);
   }
-  stmt(kind: TokenKind, stmt: StmtHandler){
+  stmt(kind: TokenKind, stmt: StmtHandler) {
     this.bpTable.set(kind, BP.DEFAULT_BP);
     this.stmtLookup.set(kind, stmt);
   }
-  public expect(kind: TokenKind, err?: string){
+  public expect(kind: TokenKind, err?: string) {
     const token = this.peek();
-    if (token.kind !== kind){
-      if (err){
+    if (token.kind !== kind) {
+      if (err) {
         throw new Error(err);
       }
       throw new Error(`Expcetion ${getTokenName(kind)} but find ${getTokenName(token.kind)}`);
     }
     return this.next();
   }
-  public setupTokenLookup(){
+  public setupTokenLookup() {
     this.led(TokenKind.ASSIGNMENT, BP.ASSIGNMENT, this.parseAssignment);
 
     this.led(TokenKind.LOGIC_AND, BP.LOGICAL, this.parseBinaryExpr);
@@ -391,8 +392,8 @@ export class Parser {
     this.nud(TokenKind.IDENTIFIER, BP.PRIMAR, this.parsePrimaryExpr);
     this.nud(TokenKind.OPEN_BRACKET, BP.PRIMAR, this.parseArrayLiteral);
     this.nud(TokenKind.OPEN_CURLY, BP.PRIMAR, this.parseObjectLiteral);
-    this.nud(TokenKind.NULL,BP.PRIMAR,this.parsePrimaryExpr);
-    
+    this.nud(TokenKind.NULL, BP.PRIMAR, this.parsePrimaryExpr);
+
     this.nud(TokenKind.DASH, BP.UNARY, this.parsePrefixExpr);
     this.nud(TokenKind.NOT, BP.UNARY, this.parsePrefixExpr);
 
@@ -405,6 +406,7 @@ export class Parser {
 
     this.stmt(TokenKind.OPEN_CURLY, this.parseBlock);
     this.stmt(TokenKind.LET, this.parseVarDeclStmt);
+    this.stmt(TokenKind.CONST, this.parseVarDeclStmt);
     this.stmt(TokenKind.FUNCTION, this.parseFnDecl);
     this.stmt(TokenKind.IF, this.parseIfStmt);
     this.stmt(TokenKind.RETURN, this.parseReturn);

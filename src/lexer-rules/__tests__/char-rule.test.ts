@@ -111,8 +111,8 @@ describe('Lexer - CharRule', () => {
         new Token(TokenKind.EOF, 'EOF'),
       ])
   })
-  it('decl', ()=>{
-    const lexer = new Lexer([spaceRule,commenteRule,stringLiteralRule,numberLiteralRule,identifierRule,...charRules], 'x <- 1');
+  it('decl', () => {
+    const lexer = new Lexer([spaceRule, commenteRule, stringLiteralRule, numberLiteralRule, identifierRule, ...charRules], 'x <- 1');
     const tokens = lexer.run();
     expect(tokens).toStrictEqual([
       new Token(TokenKind.IDENTIFIER, 'x'),
@@ -121,7 +121,7 @@ describe('Lexer - CharRule', () => {
       new Token(TokenKind.EOF, 'EOF'),
     ])
   })
-  it('if', ()=>{
+  it('if', () => {
     const input = `
 x <- 1
 if (x <= 1){
@@ -129,7 +129,7 @@ if (x <= 1){
   f()
 }
 `
-    const lexer = new Lexer([spaceRule,commenteRule,stringLiteralRule,numberLiteralRule,identifierRule,...charRules], input);
+    const lexer = new Lexer([spaceRule, commenteRule, stringLiteralRule, numberLiteralRule, identifierRule, ...charRules], input);
     const tokens = lexer.run();
     expect(tokens).toStrictEqual(
       [
@@ -159,7 +159,7 @@ if (x <= 1){
   });
   it('should ignore comments', () => {
     const input = '// this is a comment\nlet x <- 10;';
-    const lexer = new Lexer([commenteRule, ...charRules, spaceRule,identifierRule,numberLiteralRule], input);
+    const lexer = new Lexer([commenteRule, ...charRules, spaceRule, identifierRule, numberLiteralRule], input);
     const tokens = lexer.run();
 
     expect(tokens).toEqual([
@@ -173,7 +173,7 @@ if (x <= 1){
   });
   it('should handle mixed input correctly', () => {
     const input = 'let x <- 10; if (x > 5) { x <- x + 1; }';
-    const lexer = new Lexer([spaceRule, commenteRule, spaceRule, numberLiteralRule, ...charRules,identifierRule], input);
+    const lexer = new Lexer([spaceRule, commenteRule, spaceRule, numberLiteralRule, ...charRules, identifierRule], input);
     const tokens = lexer.run();
 
     expect(tokens).toEqual([
@@ -199,9 +199,22 @@ if (x <= 1){
       new Token(TokenKind.EOF, 'EOF'),
     ]);
   });
+  it('should handle const', () => {
+    const input = `const x <- 10;`;
+    const lexer = new Lexer([spaceRule, commenteRule, numberLiteralRule, ...charRules, identifierRule], input);
+    const tokens = lexer.run();
+    expect(tokens).toEqual([
+      new Token(TokenKind.CONST, 'const'),
+      new Token(TokenKind.IDENTIFIER, 'x'),
+      new Token(TokenKind.ASSIGNMENT, '<-'),
+      new Token(TokenKind.NUMBER, '10'),
+      new Token(TokenKind.SEMI, ';'),
+      new Token(TokenKind.EOF, 'EOF'),
+    ])
+  })
   it('should handle edge cases with mixed input', () => {
     const input = 'let x <- 10; // comment\nif (x > 5) { x <- x + 1; }';
-    const lexer = new Lexer([spaceRule, commenteRule, numberLiteralRule, ...charRules,  identifierRule], input);
+    const lexer = new Lexer([spaceRule, commenteRule, numberLiteralRule, ...charRules, identifierRule], input);
     const tokens = lexer.run();
 
     expect(tokens).toEqual([

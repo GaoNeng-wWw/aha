@@ -2,11 +2,26 @@ import { describe, it, expect } from 'vitest';
 import { Assignment } from '../assignment';
 import { Env } from '../env';
 import { Identifier } from '../literal-expression';
-import { createNumberLiteral } from '@/utils/create';
+import { createNumberLiteral, createProgram } from '@/utils/create';
 import { NullLiteral } from '../node';
 import { unwrap } from '@/utils';
 
 describe('Assignment', () => {
+  it('can not assign a value to an constant', () => {
+    const env = new Env();
+    env.define('x', new NullLiteral());
+    env.defineConst('x');
+    const id = new Identifier('x');
+    const value = createNumberLiteral(42);
+    const assignment = new Assignment(id, value);
+    expect(() => assignment.eval(env)).toThrow(Error);
+    expect(env.lookup('x')).instanceOf(NullLiteral)
+  })
+  it('can not assignment a value to an constant', () => {
+    const p = createProgram(`const x <- 1; const y <- x; y <- 3;`)
+    const env = new Env();
+    expect(() => p.eval(env)).toThrow(Error);
+  })
   it('should assign a value to an identifier', () => {
     const env = new Env();
     env.define('x', new NullLiteral())
