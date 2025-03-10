@@ -55,6 +55,7 @@ export enum TokenKind {
   NULL,
   BREAK,
   CONTINUE,
+  CONST
 }
 
 
@@ -62,18 +63,18 @@ export class Token {
   constructor(
     public kind: TokenKind,
     public value: string,
-  ){}
-  isOne(kind: TokenKind){
+  ) { }
+  isOne(kind: TokenKind) {
     return this.kind === kind;
   }
-  isMany(...kinds:TokenKind[]){
+  isMany(...kinds: TokenKind[]) {
     return kinds.some((k) => k === this.kind);
   }
 }
-export type LexerRuleHandle = (param:{lexer:Lexer,pattern:RegExp,match:RegExpMatchArray, reminder: string}) => void;
+export type LexerRuleHandle = (param: { lexer: Lexer, pattern: RegExp, match: RegExpMatchArray, reminder: string }) => void;
 export type LexerRule = [RegExp, LexerRuleHandle];
 export class LexerError extends Error {
-  constructor(message:string) {
+  constructor(message: string) {
     super(`ERR Lexer: ${message}`);
   }
 }
@@ -85,47 +86,47 @@ export class Lexer {
   constructor(
     public rules: LexerRule[],
     public input: string
-  ){
+  ) {
     this.pos = 0;
     this.cursor = 0;
     this.tokens = [];
   }
-  run(){
-    while (!this.isEof()){
+  run() {
+    while (!this.isEof()) {
       let matched = false;
-      for (const [pattern, handle] of this.rules){
+      for (const [pattern, handle] of this.rules) {
         const match = pattern.exec(this.reminder());
-        if (!match){
+        if (!match) {
           continue;
         }
         matched = true;
-        handle({lexer:this, pattern, match, reminder:this.reminder()})
+        handle({ lexer: this, pattern, match, reminder: this.reminder() })
         break;
       }
-      if (!matched){
+      if (!matched) {
         throw new LexerError(`unrecognized token near ${this.reminder()}`);
       }
     }
-    this.tokens.push(this.createToken(TokenKind.EOF,'EOF'));
+    this.tokens.push(this.createToken(TokenKind.EOF, 'EOF'));
     return this.tokens;
   }
-  push(token: Token){
+  push(token: Token) {
     this.tokens.push(token);
     return;
   }
-  createToken(kind:TokenKind, value: string){
+  createToken(kind: TokenKind, value: string) {
     return new Token(kind, value);
   }
-  reminder(){
+  reminder() {
     return this.input.slice(this.pos);
   }
-  advance(){
+  advance() {
     this.advanceN(1);
   }
-  advanceN(n: number){
+  advanceN(n: number) {
     this.pos += n;
   }
-  isEof(){
+  isEof() {
     return this.pos >= this.input.length;
   }
 }

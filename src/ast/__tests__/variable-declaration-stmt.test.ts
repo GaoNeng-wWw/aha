@@ -18,6 +18,14 @@ describe('VarDeclStmt', () => {
     stmt.eval(env);
     expect(env.lookup('x')).toBe(value);
   });
+  it('should defin a constant', () => {
+    const env = new Env();
+    const value = new NullLiteral();
+    const stmt = new VarDeclStmt('x', true, value);
+    stmt.eval(env);
+    expect(env.lookup('x')).toBe(value);
+    expect(env.constTable.has('x')).toBe(true);
+  })
 
   it('should define a variable with an evaluated expression', () => {
     const env = new Env();
